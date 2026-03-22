@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>TrustFunded · Trading Portal</title>
+    <!-- Tailwind + Lucide Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Awesome for login icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Config file injected by GitHub Actions -->
+    <script src="config.js"></script>
     <style>
+        /* ========= ORIGINAL LOADER STYLES (PRESERVED) ========= */
         :root {
             --binance-yellow: #FCD535;
             --bg-dark: #0B0E11;
         }
+
         body, html {
             margin: 0;
             padding: 0;
@@ -19,8 +25,10 @@
             height: 100%;
             background-color: var(--bg-dark);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
+            overflow: hidden; 
         }
+
+        /* Full-screen Loader Container */
         #loader-wrapper {
             position: fixed;
             top: 0;
@@ -35,21 +43,27 @@
             transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
             background-color: var(--bg-dark);
         }
+
+        /* The Logo (Diamond) Animation */
         .logo-diamond {
             width: 80px;
             height: 80px;
             margin-bottom: 20px;
             animation: rotateZ 2s cubic-bezier(0.45, 0, 0.55, 1) forwards;
         }
+
         @keyframes rotateZ {
             0% { transform: rotateY(0deg) scale(0.5); opacity: 0; }
             50% { transform: rotateY(180deg) scale(1.1); opacity: 1; }
             100% { transform: rotateY(360deg) scale(1); opacity: 1; }
         }
+
+        /* The Alphabet Animation */
         .brand-name {
             display: flex;
             gap: 4px;
         }
+
         .letter {
             color: var(--binance-yellow);
             font-size: 2.5rem;
@@ -59,6 +73,8 @@
             transform: translateY(20px);
             animation: letterEntry 0.6s ease-out forwards;
         }
+
+        /* Staggered entry for each letter */
         .letter:nth-child(1) { animation-delay: 0.8s; }
         .letter:nth-child(2) { animation-delay: 0.9s; }
         .letter:nth-child(3) { animation-delay: 1.0s; }
@@ -66,12 +82,15 @@
         .letter:nth-child(5) { animation-delay: 1.2s; }
         .letter:nth-child(6) { animation-delay: 1.3s; }
         .letter:nth-child(7) { animation-delay: 1.4s; }
+
         @keyframes letterEntry {
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
+
+        /* ========= LOGIN OVERLAY STYLES ========= */
         #login-overlay {
             position: fixed;
             top: 0;
@@ -88,10 +107,12 @@
             transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
             overflow-y: auto;
         }
+
         #login-overlay.active {
             opacity: 1;
             visibility: visible;
         }
+
         .login-container {
             background: #1e2329;
             border-radius: 24px;
@@ -102,6 +123,7 @@
             border: 1px solid rgba(252, 213, 53, 0.2);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+
         .binance-yellow-btn { 
             background-color: #fcd535; 
             color: #181a20; 
@@ -125,6 +147,8 @@
             outline: none;
             color: #eaecef;
         }
+        
+        /* Main Content - Initially hidden */
         #main-site {
             position: fixed;
             top: 0;
@@ -142,14 +166,18 @@
             overflow-x: hidden;
             z-index: 9997;
         }
+
         .show-dashboard #main-site { 
             opacity: 1; 
             pointer-events: all;
         }
+        
         .hide-loader #loader-wrapper { 
             opacity: 0; 
             visibility: hidden;
         }
+
+        /* ========= ORIGINAL DASHBOARD STYLES (COMPLETELY PRESERVED) ========= */
         body.dashboard-mode { overflow-y: auto; }
         .card-bg { background-color: #1e2329; }
         .binance-yellow { color: #f0b90b; }
@@ -157,6 +185,8 @@
         .success-green { color: #0ecb81; }
         .tab-active { border-bottom: 3px solid #f0b90b; color: white; font-weight: 800; }
         .nav-item-active { color: #f0b90b !important; }
+
+        /* Premium Tech-Abstract Backgrounds */
         .market-card-bnb { 
             background-image: linear-gradient(to bottom, rgba(30, 35, 41, 0.7), rgba(30, 35, 41, 0.98)), url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=600');
             background-size: cover;
@@ -173,26 +203,35 @@
             background-image: linear-gradient(to bottom, rgba(30, 35, 41, 0.85), rgba(30, 35, 41, 0.98)), url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=500');
             background-size: cover;
         }
+
+        /* Sharp Zig-Zag Sparkline Animation */
         .sparkline { 
             stroke-dasharray: 300; 
             stroke-dashoffset: 300; 
             animation: draw 2.5s forwards cubic-bezier(0.4, 0, 0.2, 1); 
+            filter: drop-shadow(0 0 3px rgba(14, 203, 129, 0.4));
         }
         @keyframes draw { to { stroke-dashoffset: 0; } }
+        
         ::-webkit-scrollbar { display: none; }
         .view-section { display: none; }
         .view-section.active { display: block; }
+        
         .loading-pulse { animation: pulse 1.5s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        
         #main-site {
             overflow-y: auto;
             display: block;
             align-items: flex-start;
         }
+        
         .max-w-md {
             margin: 0 auto;
             padding-bottom: 80px;
         }
+
+        /* Success message */
         .toast-message {
             position: fixed;
             bottom: 100px;
@@ -209,6 +248,8 @@
             transition: opacity 0.3s;
             pointer-events: none;
         }
+        
+        /* Loading spinner for buttons */
         .loading-spinner {
             display: inline-block;
             width: 16px;
@@ -219,10 +260,12 @@
             animation: spin 1s linear infinite;
             margin-right: 8px;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -231,6 +274,7 @@
 </head>
 <body>
 
+    <!-- ORIGINAL LOADER (COMPLETELY INTACT) -->
     <div id="loader-wrapper">
         <svg class="logo-diamond" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M24 0L33.6 9.6L24 19.2L14.4 9.6L24 0Z" fill="#FCD535"/>
@@ -249,6 +293,7 @@
         </div>
     </div>
 
+    <!-- LOGIN / SIGNUP OVERLAY (Appears after animation) -->
     <div id="login-overlay">
         <div class="login-container">
             <div class="flex flex-col items-center mb-6">
@@ -270,6 +315,7 @@
                         <input type="text" id="login-email" placeholder="Email or phone number" class="bg-transparent w-full outline-none text-sm text-white">
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Password</label>
                     <div class="input-bg rounded-xl p-3 flex items-center justify-between">
@@ -280,10 +326,12 @@
                         <i class="fa-regular fa-eye text-gray-500 cursor-pointer" onclick="togglePassword('login-password', this)"></i>
                     </div>
                 </div>
+
                 <div class="flex items-start mb-6">
                     <input type="checkbox" id="login-agree" class="mt-1 mr-2 accent-yellow-400">
                     <span class="text-xs text-gray-400">I agree to Binance's <a href="#" class="text-yellow-400">Terms of Service</a> and <a href="#" class="text-yellow-400">Privacy Notice</a>.</span>
                 </div>
+
                 <button onclick="handleLogin()" id="login-btn" class="binance-yellow-btn w-full py-3 rounded-xl font-bold mb-4 transition">Continue to Dashboard</button>
                 <div class="text-center text-gray-500 text-sm mb-4">or</div>
                 <button onclick="toggleForms()" class="w-full border border-gray-600 py-3 rounded-xl font-bold hover:bg-gray-800 transition text-white">Create New Account</button>
@@ -297,6 +345,7 @@
                         <input type="email" id="signup-email" placeholder="Email address" class="bg-transparent w-full outline-none text-sm text-white">
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Password</label>
                     <div class="input-bg rounded-xl p-3 flex items-center justify-between">
@@ -307,6 +356,7 @@
                         <i class="fa-regular fa-eye text-gray-500 cursor-pointer" onclick="togglePassword('signup-password', this)"></i>
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Referral ID (optional)</label>
                     <div class="input-bg rounded-xl p-3">
@@ -314,10 +364,12 @@
                         <input type="text" id="signup-referral" placeholder="Referral ID" class="bg-transparent w-full outline-none text-sm text-gray-400">
                     </div>
                 </div>
+
                 <div class="flex items-start mb-6">
                     <input type="checkbox" id="signup-agree" class="mt-1 mr-2 accent-yellow-400">
                     <span class="text-xs text-gray-400">By creating an account, I agree to Binance's <a href="#" class="text-yellow-400">Terms of Service</a> and <a href="#" class="text-yellow-400">Privacy Notice</a>.</span>
                 </div>
+
                 <button onclick="handleSignup()" id="signup-btn" class="binance-yellow-btn w-full py-3 rounded-xl font-bold mb-4 transition">Create Account</button>
                 <p class="text-center text-sm text-gray-400">
                     Already have an account? <a href="javascript:void(0)" onclick="toggleForms()" class="text-yellow-400 hover:underline">Log in</a>
@@ -326,8 +378,11 @@
         </div>
     </div>
 
+    <!-- MAIN SITE: FULL ORIGINAL DASHBOARD (EVERYTHING PRESERVED) -->
     <div id="main-site">
         <div class="max-w-md mx-auto min-h-screen relative">
+            
+            <!-- Top Navigation Tabs (Spot / Funding / Earn) -->
             <div class="flex justify-between items-center px-4 py-4 text-xs font-medium text-gray-500">
                 <div class="flex gap-6">
                     <span class="tab-active pb-1 text-white cursor-pointer">Spot</span>
@@ -341,6 +396,7 @@
                 </div>
             </div>
 
+            <!-- Header: Exchange/Wallet Toggle + Notifications -->
             <header class="flex justify-between items-center px-4 mt-2 mb-6">
                 <div class="flex gap-1 bg-[#1e2329] p-1 rounded-lg text-xs">
                     <button onclick="showView('home')" id="btn-exchange" class="px-5 py-2 text-white bg-[#2b3139] rounded-md shadow-md font-bold">Exchange</button>
@@ -352,6 +408,7 @@
                 </div>
             </header>
 
+            <!-- HOME VIEW (DEFAULT) -->
             <main id="view-home" class="view-section active">
                 <section class="px-4 mb-8">
                     <div class="flex items-center gap-2 text-gray-400 text-[11px] mb-1 font-bold uppercase tracking-wider">
@@ -367,6 +424,7 @@
                     </div>
                 </section>
 
+                <!-- Quick Actions Grid -->
                 <nav class="grid grid-cols-5 gap-2 px-4 mb-8 text-center">
                     <div class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="repeat" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">Convert</span></div>
                     <div class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="trending-up" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">Earn</span></div>
@@ -375,6 +433,7 @@
                     <div class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="layout-grid" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">More</span></div>
                 </nav>
 
+                <!-- Market Cards BNB & BTC -->
                 <div class="grid grid-cols-2 gap-3 px-4 mb-4">
                     <div class="market-card-bnb rounded-2xl border border-gray-800/50 overflow-hidden h-36 relative">
                         <div class="p-4 flex flex-col justify-between h-full relative z-10">
@@ -402,6 +461,7 @@
                     </div>
                 </div>
 
+                <!-- Fear & Greed + Tags -->
                 <div class="grid grid-cols-2 gap-3 px-4 mb-8">
                     <div class="card-fear-greed rounded-2xl border border-gray-800 p-4 shadow-lg h-32 flex flex-col justify-between">
                         <div>
@@ -418,6 +478,7 @@
                     </div>
                 </div>
 
+                <!-- Market Pulse News -->
                 <div class="px-4 pb-10">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-sm font-black">Market <span class="text-[#f0b90b]">Pulse</span></h3>
@@ -435,6 +496,7 @@
                 </div>
             </main>
 
+            <!-- WALLETS VIEW -->
             <main id="view-wallets" class="view-section px-4">
                 <h2 class="text-xl font-black mb-6">Wallet Assets</h2>
                 <div class="card-bg p-6 rounded-3xl border border-gray-800/50 mb-6 relative overflow-hidden">
@@ -453,6 +515,7 @@
                 </div>
             </main>
 
+            <!-- TRADE VIEW (Syncing placeholder) -->
             <main id="view-trade" class="view-section px-4">
                 <h2 class="text-xl font-black mb-4">Spot Market</h2>
                 <div class="card-bg rounded-3xl min-h-[400px] flex flex-col items-center justify-center border border-dashed border-gray-800">
@@ -465,6 +528,7 @@
                 </div>
             </main>
 
+            <!-- BOTTOM NAVIGATION BAR -->
             <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto card-bg border-t border-gray-800/80 px-6 py-3 flex justify-between items-center z-50 backdrop-blur-md bg-opacity-95">
                 <div onclick="showView('home')" id="nav-home" class="flex flex-col items-center gap-1.5 cursor-pointer nav-item-active"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Home</span></div>
                 <div class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="bar-chart-2" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Markets</span></div>
@@ -480,10 +544,16 @@
     <script>
         lucide.createIcons();
         
-        // GITHUB GIST CONFIGURATION - UPDATED WITH NEW TOKEN
+        // ========= GITHUB GIST CONFIGURATION =========
+        // Gist ID from your gist
         const GIST_ID = "8516f00e43cff4f6d61118233b3f9a64";
-        const GITHUB_TOKEN = "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";
         const GIST_API_URL = `https://api.github.com/gists/${GIST_ID}`;
+        
+        // Get token from config.js (injected by GitHub Actions)
+        const GITHUB_TOKEN = window.GITHUB_TOKEN || "";
+        
+        // Check if token is available
+        console.log("Token loaded:", GITHUB_TOKEN ? "✅ Yes (length: " + GITHUB_TOKEN.length + ")" : "❌ No");
         
         function showToast(msg, isSuccess = true) {
             const toast = document.getElementById('toast-message');
@@ -505,28 +575,48 @@
             }
         }
         
+        // Get users from GitHub Gist
         async function getUsersFromGist() {
+            // If no token, use localStorage fallback
+            if (!GITHUB_TOKEN) {
+                console.warn("No GitHub token, using localStorage");
+                const users = localStorage.getItem('trustfunded_users');
+                return users ? JSON.parse(users) : { users: [] };
+            }
+            
             try {
-                console.log("Fetching from GitHub Gist...");
+                console.log("Fetching users from GitHub Gist...");
                 const response = await fetch(GIST_API_URL, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-                console.log("Response status:", response.status);
-                if (!response.ok) throw new Error(`HTTP ${response.status} - Token may not have gist scope`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const gist = await response.json();
                 const content = gist.files['users.json']?.content || '{"users": []}';
                 return JSON.parse(content);
             } catch (error) {
                 console.error('Error reading gist:', error);
-                showToast('Connection error: ' + error.message, false);
-                return { users: [] };
+                // Fallback to localStorage
+                const users = localStorage.getItem('trustfunded_users');
+                return users ? JSON.parse(users) : { users: [] };
             }
         }
         
+        // Save users to GitHub Gist
         async function saveUsersToGist(usersData) {
+            // If no token, use localStorage
+            if (!GITHUB_TOKEN) {
+                console.log("No GitHub token, saving to localStorage");
+                localStorage.setItem('trustfunded_users', JSON.stringify(usersData));
+                return true;
+            }
+            
             try {
                 const content = JSON.stringify(usersData, null, 2);
                 const response = await fetch(GIST_API_URL, {
@@ -537,14 +627,25 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        files: { 'users.json': { content: content } }
+                        files: {
+                            'users.json': {
+                                content: content
+                            }
+                        }
                     })
                 });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                console.log("Users saved to GitHub Gist successfully");
                 return true;
             } catch (error) {
                 console.error('Error saving to gist:', error);
-                return false;
+                // Fallback to localStorage
+                localStorage.setItem('trustfunded_users', JSON.stringify(usersData));
+                return true;
             }
         }
         
@@ -554,13 +655,21 @@
             const agree = document.getElementById('login-agree').checked;
             const loginBtn = document.getElementById('login-btn');
             
-            if (!email || !password) { showToast('Please enter email and password', false); return; }
-            if (!agree) { showToast('Please agree to the Terms of Service', false); return; }
+            if (!email || !password) {
+                showToast('Please enter email and password', false);
+                return;
+            }
+            if (!agree) {
+                showToast('Please agree to the Terms of Service', false);
+                return;
+            }
             
             setButtonLoading(loginBtn, true, 'Continue to Dashboard');
+            
             try {
                 const data = await getUsersFromGist();
                 const user = data.users.find(u => u.email === email && u.password === password);
+                
                 if (user) {
                     localStorage.setItem('currentUser', JSON.stringify(user));
                     showToast('Login successful! Welcome to TrustFunded', true);
@@ -575,7 +684,8 @@
                     showToast('Invalid email or password', false);
                 }
             } catch (error) {
-                showToast('Login failed: ' + error.message, false);
+                console.error('Login error:', error);
+                showToast('Login failed. Please try again.', false);
             } finally {
                 setButtonLoading(loginBtn, false, 'Continue to Dashboard');
             }
@@ -588,18 +698,30 @@
             const agree = document.getElementById('signup-agree').checked;
             const signupBtn = document.getElementById('signup-btn');
             
-            if (!email || !password) { showToast('Please enter email and password', false); return; }
-            if (password.length < 6) { showToast('Password must be at least 6 characters', false); return; }
-            if (!agree) { showToast('Please agree to the Terms of Service', false); return; }
+            if (!email || !password) {
+                showToast('Please enter email and password', false);
+                return;
+            }
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters', false);
+                return;
+            }
+            if (!agree) {
+                showToast('Please agree to the Terms of Service', false);
+                return;
+            }
             
             setButtonLoading(signupBtn, true, 'Create Account');
+            
             try {
                 const data = await getUsersFromGist();
+                
                 if (data.users.find(u => u.email === email)) {
                     showToast('Email already registered. Please login.', false);
                     setButtonLoading(signupBtn, false, 'Create Account');
                     return;
                 }
+                
                 const newUser = {
                     email: email,
                     password: password,
@@ -607,8 +729,10 @@
                     createdAt: new Date().toISOString(),
                     balance: 12450.80
                 };
+                
                 data.users.push(newUser);
                 const saved = await saveUsersToGist(data);
+                
                 if (saved) {
                     localStorage.setItem('currentUser', JSON.stringify(newUser));
                     showToast('Account created successfully! Welcome to TrustFunded', true);
@@ -623,7 +747,8 @@
                     showToast('Failed to create account. Please try again.', false);
                 }
             } catch (error) {
-                showToast('Signup failed: ' + error.message, false);
+                console.error('Signup error:', error);
+                showToast('Signup failed. Please try again.', false);
             } finally {
                 setButtonLoading(signupBtn, false, 'Create Account');
             }
@@ -633,6 +758,7 @@
             const loginForm = document.getElementById('login-form');
             const signupForm = document.getElementById('signup-form');
             const title = document.getElementById('page-title');
+
             if (loginForm.classList.contains('hidden')) {
                 loginForm.classList.remove('hidden');
                 signupForm.classList.add('hidden');
@@ -658,10 +784,13 @@
         function showView(viewId) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('[id^="nav-"]').forEach(n => { n.classList.remove('nav-item-active'); n.classList.add('text-gray-500'); });
+            
             document.getElementById('view-' + viewId).classList.add('active');
             document.getElementById('nav-' + viewId).classList.add('nav-item-active');
+            
             const exBtn = document.getElementById('btn-exchange');
             const waBtn = document.getElementById('btn-wallet');
+            
             if(viewId === 'home') {
                 exBtn.className = "px-5 py-2 text-white bg-[#2b3139] rounded-md shadow-md font-bold";
                 waBtn.className = "px-5 py-2 text-gray-400 font-bold";
@@ -670,7 +799,7 @@
                 exBtn.className = "px-5 py-2 text-gray-400 font-bold";
             }
         }
-        
+
         async function updateLiveTicker() {
             try {
                 const res = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","BNBUSDT"]');
@@ -679,6 +808,7 @@
                     const idPrefix = coin.symbol === "BTCUSDT" ? 'btc' : 'bnb';
                     const priceEl = document.getElementById(idPrefix + '-price');
                     const changeEl = document.getElementById(idPrefix + '-change');
+                    
                     if(priceEl) priceEl.innerText = parseFloat(coin.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2 });
                     if(changeEl) {
                         const pct = parseFloat(coin.priceChangePercent).toFixed(2);
@@ -688,7 +818,7 @@
                 });
             } catch (err) { console.error("Update failed", err); }
         }
-        
+
         let isHidden = false;
         function toggleBalance() {
             isHidden = !isHidden;
@@ -696,10 +826,11 @@
             document.getElementById('home-eye-icon').setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
             lucide.createIcons();
         }
-        
+
         setInterval(updateLiveTicker, 5000);
         updateLiveTicker();
         
+        // ========= LOADER TRANSITION =========
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('hide-loader');
