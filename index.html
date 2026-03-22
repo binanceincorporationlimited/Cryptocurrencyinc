@@ -480,9 +480,9 @@
     <script>
         lucide.createIcons();
         
-        // GITHUB GIST CONFIGURATION - YOUR WORKING CREDENTIALS
+        // GITHUB GIST CONFIGURATION - UPDATED WITH NEW TOKEN
         const GIST_ID = "8516f00e43cff4f6d61118233b3f9a64";
-        const GITHUB_TOKEN = "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";
+        const GITHUB_TOKEN = "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";
         const GIST_API_URL = `https://api.github.com/gists/${GIST_ID}`;
         
         function showToast(msg, isSuccess = true) {
@@ -507,13 +507,15 @@
         
         async function getUsersFromGist() {
             try {
+                console.log("Fetching from GitHub Gist...");
                 const response = await fetch(GIST_API_URL, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                console.log("Response status:", response.status);
+                if (!response.ok) throw new Error(`HTTP ${response.status} - Token may not have gist scope`);
                 const gist = await response.json();
                 const content = gist.files['users.json']?.content || '{"users": []}';
                 return JSON.parse(content);
