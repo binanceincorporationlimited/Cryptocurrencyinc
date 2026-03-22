@@ -1,22 +1,36 @@
-name: Deploy with Secrets
+name: Deploy Website with Secret Token
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v2
+      # Step 1: Checkout your code
+      - name: Checkout repository
+        uses: actions/checkout@v3
       
-      - name: Inject GitHub Token
+      # Step 2: Create config file with your gist_token
+      - name: Create config file
         run: |
-          # Replace placeholder with actual secret
-          sed -i "s|YOUR_GITHUB_TOKEN_PLACEHOLDER|${{ secrets.GITHUB_TOKEN }}|g" index.html
+          echo "// Auto-generated config file - DO NOT EDIT" > config.js
+          echo "const GITHUB_TOKEN = '${{ secrets.gist_token }}';" >> config.js
+          echo "console.log('✅ Config loaded with token');" >> config.js
+          echo "console.log('Token length:', GITHUB_TOKEN.length);" >> config.js
           
+      # Step 3: Show what files we have (for debugging)
+      - name: List files
+        run: ls -la
+      
+      # Step 4: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
+          publish_branch: gh-pages
+          keep_files: false
