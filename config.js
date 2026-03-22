@@ -1,1 +1,0 @@
-const GITHUB_TOKEN = "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";
