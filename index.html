@@ -378,11 +378,11 @@
         </div>
     </div>
 
-    <!-- MAIN SITE: FULL ORIGINAL DASHBOARD (EVERYTHING PRESERVED) -->
+    <!-- MAIN SITE: FULL ORIGINAL DASHBOARD -->
     <div id="main-site">
         <div class="max-w-md mx-auto min-h-screen relative">
             
-            <!-- Top Navigation Tabs (Spot / Funding / Earn) -->
+            <!-- Top Navigation Tabs -->
             <div class="flex justify-between items-center px-4 py-4 text-xs font-medium text-gray-500">
                 <div class="flex gap-6">
                     <span class="tab-active pb-1 text-white cursor-pointer">Spot</span>
@@ -396,7 +396,7 @@
                 </div>
             </div>
 
-            <!-- Header: Exchange/Wallet Toggle + Notifications -->
+            <!-- Header -->
             <header class="flex justify-between items-center px-4 mt-2 mb-6">
                 <div class="flex gap-1 bg-[#1e2329] p-1 rounded-lg text-xs">
                     <button onclick="showView('home')" id="btn-exchange" class="px-5 py-2 text-white bg-[#2b3139] rounded-md shadow-md font-bold">Exchange</button>
@@ -408,7 +408,7 @@
                 </div>
             </header>
 
-            <!-- HOME VIEW (DEFAULT) -->
+            <!-- HOME VIEW -->
             <main id="view-home" class="view-section active">
                 <section class="px-4 mb-8">
                     <div class="flex items-center gap-2 text-gray-400 text-[11px] mb-1 font-bold uppercase tracking-wider">
@@ -424,7 +424,7 @@
                     </div>
                 </section>
 
-                <!-- Quick Actions Grid -->
+                <!-- Quick Actions -->
                 <nav class="grid grid-cols-5 gap-2 px-4 mb-8 text-center">
                     <div class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="repeat" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">Convert</span></div>
                     <div class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="trending-up" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">Earn</span></div>
@@ -433,7 +433,7 @@
                     <div class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="layout-grid" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">More</span></div>
                 </nav>
 
-                <!-- Market Cards BNB & BTC -->
+                <!-- Market Cards -->
                 <div class="grid grid-cols-2 gap-3 px-4 mb-4">
                     <div class="market-card-bnb rounded-2xl border border-gray-800/50 overflow-hidden h-36 relative">
                         <div class="p-4 flex flex-col justify-between h-full relative z-10">
@@ -515,7 +515,7 @@
                 </div>
             </main>
 
-            <!-- TRADE VIEW (Syncing placeholder) -->
+            <!-- TRADE VIEW -->
             <main id="view-trade" class="view-section px-4">
                 <h2 class="text-xl font-black mb-4">Spot Market</h2>
                 <div class="card-bg rounded-3xl min-h-[400px] flex flex-col items-center justify-center border border-dashed border-gray-800">
@@ -528,7 +528,7 @@
                 </div>
             </main>
 
-            <!-- BOTTOM NAVIGATION BAR -->
+            <!-- BOTTOM NAVIGATION -->
             <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto card-bg border-t border-gray-800/80 px-6 py-3 flex justify-between items-center z-50 backdrop-blur-md bg-opacity-95">
                 <div onclick="showView('home')" id="nav-home" class="flex flex-col items-center gap-1.5 cursor-pointer nav-item-active"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Home</span></div>
                 <div class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="bar-chart-2" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Markets</span></div>
@@ -545,8 +545,8 @@
         lucide.createIcons();
         
         // ========= GITHUB GIST CONFIGURATION =========
-        // Gist ID from your gist
-        const GIST_ID = "8516f00e43cff4f6d61118233b3f9a64";
+        // YOUR NEW GIST ID
+        const GIST_ID = "cf61e203b0f3ac1a58b7e49d86c6c24d";
         const GIST_API_URL = `https://api.github.com/gists/${GIST_ID}`;
         
         // Get token from config.js (injected by GitHub Actions)
@@ -554,6 +554,7 @@
         
         // Check if token is available
         console.log("Token loaded:", GITHUB_TOKEN ? "✅ Yes (length: " + GITHUB_TOKEN.length + ")" : "❌ No");
+        console.log("Gist ID:", GIST_ID);
         
         function showToast(msg, isSuccess = true) {
             const toast = document.getElementById('toast-message');
@@ -599,6 +600,7 @@
                 
                 const gist = await response.json();
                 const content = gist.files['users.json']?.content || '{"users": []}';
+                console.log("Users loaded from Gist");
                 return JSON.parse(content);
             } catch (error) {
                 console.error('Error reading gist:', error);
