@@ -15,12 +15,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      
+
       - name: Create config file
         run: |
           echo "const GITHUB_TOKEN = '${{ secrets.gist_token }}';" > config.js
           echo "console.log('Token loaded');" >> config.js
-      
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
