@@ -75,48 +75,34 @@
         .price-down-bg { background-color: #f6465d; transition: background-color 0.3s; }
         .market-container { background-color: #12161c; }
 
-        /* Scroll-up homedown section styles */
+        /* HOMEDOWN SECTION - Below the main content */
         .homedown-section {
             background-color: #1e2329;
-            border-radius: 0 0 24px 24px;
-            margin: 0 0 16px 0;
-            padding: 16px 20px 20px 20px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(-100%);
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            border-bottom: 1px solid rgba(252,213,53,0.15);
+            border-radius: 24px 24px 0 0;
+            margin: 24px 16px 16px 16px;
+            padding: 20px 20px 24px 20px;
+            transition: all 0.4s ease-out;
+            border-top: 2px solid rgba(252,213,53,0.3);
+            border-bottom: 1px solid rgba(252,213,53,0.1);
         }
-        .homedown-section.revealed {
-            transform: translateY(0);
-            opacity: 1;
-            max-height: 600px;
-            margin-bottom: 16px;
-        }
-        .scroll-indicator {
+        .scroll-hint {
             text-align: center;
             font-size: 10px;
             color: #848e9c;
-            padding: 6px 0 4px 0;
+            padding: 8px 0 4px 0;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
             cursor: pointer;
             transition: opacity 0.2s;
+            margin: 0 16px 8px 16px;
         }
-        .scroll-indicator i {
+        .scroll-hint i {
             transition: transform 0.3s;
         }
-        .scroll-indicator.revealed i {
+        .scroll-hint.revealed i {
             transform: rotate(180deg);
-        }
-        .homedown-item {
-            transition: all 0.2s;
-        }
-        .homedown-item:hover {
-            transform: translateX(4px);
         }
         .text-gray-custom { color: #848e9c; }
         .bg-green-custom { background-color: #2ebd85; }
@@ -215,34 +201,8 @@
 
     <div id="main-site">
         <div class="max-w-md mx-auto min-h-screen relative">
-            <!-- HOMEDOWN SECTION - Scroll Up to Reveal -->
-            <div id="homedownSection" class="homedown-section">
-                <div class="flex space-x-6 text-sm font-semibold text-gray-custom mb-4 overflow-x-auto whitespace-nowrap pb-2">
-                    <span>Favorites</span>
-                    <span class="text-white border-b-2 border-yellow-500 pb-1">Hot</span>
-                    <span>Alpha</span>
-                    <span>New</span>
-                    <span>Gainers</span>
-                </div>
-                <div class="flex space-x-6 text-lg font-bold mb-3">
-                    <span class="text-white">Crypto</span>
-                    <span class="text-gray-custom">Futures</span>
-                </div>
-                <div class="flex justify-between text-xs text-gray-custom mb-3 px-1">
-                    <span class="w-1/3">Name</span>
-                    <span class="w-1/3 text-right">Last Price</span>
-                    <span class="w-1/3 text-right">24h chg%</span>
-                </div>
-                <div class="space-y-4" id="homedownCoinList"></div>
-            </div>
-            
-            <div id="header-exchange" class="px-4 pt-2">
-                <div class="scroll-indicator" id="scrollIndicator" onclick="toggleHomedown()">
-                    <i data-lucide="chevron-up" class="w-4 h-4"></i>
-                    <span>Pull up to see Hot Market</span>
-                    <i data-lucide="chevron-up" class="w-4 h-4"></i>
-                </div>
-                <div class="flex justify-between items-center text-xs font-medium text-gray-500 mt-1">
+            <div id="header-exchange" class="px-4 pt-4">
+                <div class="flex justify-between items-center text-xs font-medium text-gray-500">
                     <div class="flex gap-6"><span class="tab-active pb-1 text-white cursor-pointer">Spot</span><span class="cursor-pointer hover:text-white">Funding</span><span class="cursor-pointer hover:text-white">Earn</span></div>
                     <div class="flex gap-4"><i data-lucide="search" class="w-4 h-4"></i><i data-lucide="scan-line" class="w-4 h-4"></i><i data-lucide="message-square-more" class="w-4 h-4"></i></div>
                 </div>
@@ -311,6 +271,33 @@
             <main id="view-wallets" class="view-section px-4"><h2 class="text-xl font-black mb-6">Wallet Assets</h2><div class="card-bg p-6 rounded-3xl border border-gray-800/50 mb-6 relative overflow-hidden"><div class="absolute -right-4 -top-4 w-24 h-24 bg-binance-yellow/5 rounded-full blur-2xl"></div><span class="text-gray-500 text-[11px] font-bold uppercase tracking-widest mb-2 block">Total Equity</span><div class="flex items-baseline gap-2"><span class="text-3xl font-black tracking-tighter" id="wallet-main-val">0.18450000</span><span class="text-sm font-black text-gray-400">BTC</span></div><p class="text-gray-500 text-sm mt-1 font-medium">≈ $12,450.80</p></div><div class="grid grid-cols-3 gap-3"><button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Add Fund</button><button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Withdraw</button><button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Transfer</button></div></main>
             <main id="view-trade" class="view-section px-4"><h2 class="text-xl font-black mb-4">Spot Market</h2><div class="card-bg rounded-3xl min-h-[400px] flex flex-col items-center justify-center border border-dashed border-gray-800"><div class="flex gap-2 mb-4"><div class="w-2 h-2 bg-binance-yellow rounded-full loading-pulse"></div><div class="w-2 h-2 bg-binance-yellow rounded-full loading-pulse" style="animation-delay:0.2s"></div><div class="w-2 h-2 bg-binance-yellow rounded-full loading-pulse" style="animation-delay:0.4s"></div></div><p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Syncing Liquidity Pools...</p></div></main>
             
+            <!-- HOMEDOWN SECTION - BELOW main content (at bottom of page) -->
+            <div id="homedownSection" class="homedown-section">
+                <div class="flex space-x-6 text-sm font-semibold text-gray-custom mb-4 overflow-x-auto whitespace-nowrap pb-2">
+                    <span>Favorites</span>
+                    <span class="text-white border-b-2 border-yellow-500 pb-1">Hot</span>
+                    <span>Alpha</span>
+                    <span>New</span>
+                    <span>Gainers</span>
+                </div>
+                <div class="flex space-x-6 text-lg font-bold mb-3">
+                    <span class="text-white">Crypto</span>
+                    <span class="text-gray-custom">Futures</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-custom mb-3 px-1">
+                    <span class="w-1/3">Name</span>
+                    <span class="w-1/3 text-right">Last Price</span>
+                    <span class="w-1/3 text-right">24h chg%</span>
+                </div>
+                <div class="space-y-4" id="homedownCoinList"></div>
+            </div>
+            
+            <div class="scroll-hint" id="scrollHint" onclick="scrollToHomedown()">
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                <span>↓ Scroll down for Hot Market ↓</span>
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+            
             <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto card-bg border-t border-gray-800/80 px-6 py-3 flex justify-between items-center z-50 backdrop-blur-md bg-opacity-95">
                 <div onclick="showView('home')" id="nav-home" class="flex flex-col items-center gap-1.5 cursor-pointer nav-item-active"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Home</span></div>
                 <div onclick="showView('markets')" id="nav-markets" class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="bar-chart-2" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Markets</span></div>
@@ -363,52 +350,11 @@
             });
         }
 
-        // Scroll-up reveal functionality
-        let homedownRevealed = false;
-        const homedownSection = document.getElementById('homedownSection');
-        const scrollIndicator = document.getElementById('scrollIndicator');
-        const mainSiteContainer = document.getElementById('main-site');
-        
-        function toggleHomedown() {
-            homedownRevealed = !homedownRevealed;
-            if(homedownRevealed) {
-                homedownSection.classList.add('revealed');
-                scrollIndicator.classList.add('revealed');
-                scrollIndicator.innerHTML = '<i data-lucide="chevron-down" class="w-4 h-4"></i><span>Hot Market Active</span><i data-lucide="chevron-down" class="w-4 h-4"></i>';
-            } else {
-                homedownSection.classList.remove('revealed');
-                scrollIndicator.classList.remove('revealed');
-                scrollIndicator.innerHTML = '<i data-lucide="chevron-up" class="w-4 h-4"></i><span>Pull up to see Hot Market</span><i data-lucide="chevron-up" class="w-4 h-4"></i>';
+        function scrollToHomedown() {
+            const homedownSection = document.getElementById('homedownSection');
+            if(homedownSection) {
+                homedownSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            lucide.createIcons();
-        }
-        
-        // Detect scroll up at the top
-        let lastScrollTop = 0;
-        let scrollTimer = null;
-        
-        function handleScrollForReveal() {
-            if(!mainSiteContainer) return;
-            const scrollTop = mainSiteContainer.scrollTop;
-            // If at the very top and scrolling up (or just at top) and not already revealed
-            if(scrollTop <= 5 && !homedownRevealed) {
-                if(scrollTimer) clearTimeout(scrollTimer);
-                scrollTimer = setTimeout(() => {
-                    if(mainSiteContainer.scrollTop <= 5 && !homedownRevealed) {
-                        toggleHomedown();
-                    }
-                }, 100);
-            }
-            // If scrolled down more than 50px and revealed, auto hide
-            if(scrollTop > 80 && homedownRevealed) {
-                if(scrollTimer) clearTimeout(scrollTimer);
-                scrollTimer = setTimeout(() => {
-                    if(mainSiteContainer.scrollTop > 80 && homedownRevealed) {
-                        toggleHomedown();
-                    }
-                }, 80);
-            }
-            lastScrollTop = scrollTop;
         }
         
         // Enhanced Market Data (from market.html)
@@ -563,7 +509,6 @@
                         document.getElementById('login-overlay').classList.remove('active');
                         document.body.classList.add('show-dashboard');
                         lucide.createIcons();
-                        setTimeout(() => { if(mainSiteContainer) mainSiteContainer.addEventListener('scroll', handleScrollForReveal); }, 100);
                     }, 500);
                 } else { showToast('Invalid email or password', false); }
             } catch (error) { showToast('Login failed', false); }
@@ -587,8 +532,6 @@
                 setTimeout(() => {
                     document.getElementById('login-overlay').classList.remove('active');
                     document.body.classList.add('show-dashboard');
-                    lucide.createIcons();
-                    setTimeout(() => { if(mainSiteContainer) mainSiteContainer.addEventListener('scroll', handleScrollForReveal); }, 100);
                 }, 500);
             } catch (error) { showToast('Signup failed', false); }
             finally { setButtonLoading(signupBtn, false, 'Create Account'); }
