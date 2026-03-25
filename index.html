@@ -59,13 +59,12 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Market Styles (integrated from market.html) */
+        /* Market Styles */
         .active-tab-market { border-bottom: 3px solid #f0b90b; color: #ffffff; }
         .filter-pill { background-color: #2b3139; border-radius: 4px; padding: 4px 12px; font-size: 13px; white-space: nowrap; }
         .filter-active { background-color: #363c45; color: #ffffff; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* Price Animation */
         .price-flash-up { animation: flashUp 0.5s ease-out; }
         .price-flash-down { animation: flashDown 0.5s ease-out; }
         @keyframes flashUp { 0% { color: #2ebd85; } 100% { color: #ebecf0; } }
@@ -75,7 +74,6 @@
         .price-down-bg { background-color: #f6465d; transition: background-color 0.3s; }
         .market-container { background-color: #12161c; }
 
-        /* HOMEDOWN SECTION - Below main content */
         .homedown-section {
             background: linear-gradient(135deg, #1a1f26 0%, #13161d 100%);
             border-radius: 24px;
@@ -93,10 +91,6 @@
             gap: 8px;
             color: #f0b90b;
         }
-        .homedown-title i {
-            width: 20px;
-            height: 20px;
-        }
         .crypto-table-header {
             display: flex;
             justify-content: space-between;
@@ -112,14 +106,9 @@
             border-bottom: 1px solid #2b3139;
             transition: background 0.2s;
         }
-        .crypto-table-row:hover {
-            background: rgba(252,213,53,0.05);
-        }
-        .text-gray-custom { color: #848e9c; }
         .bg-green-custom { background-color: #2ebd85; }
         .bg-red-custom { background-color: #f6465d; }
 
-        /* Copy Trading Styles */
         .copy-trading-section {
             background: linear-gradient(135deg, #1a1f26 0%, #13161d 100%);
             border-radius: 24px;
@@ -145,7 +134,6 @@
             gap: 16px;
             padding: 0 20px 20px 20px;
             scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
         }
         .scroll-container::-webkit-scrollbar { height: 6px; }
         .scroll-container::-webkit-scrollbar-thumb { background: #474d57; border-radius: 10px; }
@@ -192,7 +180,6 @@
         .pnl-section { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
         .pnl-label { font-size: 11px; color: #848e9c; margin-bottom: 4px; }
         .pnl-value { font-size: 20px; font-weight: bold; color: #0ecb81; }
-        .pnl-value span { font-size: 12px; font-weight: normal; margin-left: 2px; }
         .mini-chart { width: 70px; height: 25px; border-bottom: 2px solid #0ecb81; opacity: 0.5; }
         .stats-grid {
             display: grid; grid-template-columns: 1fr 1fr 1fr;
@@ -203,7 +190,6 @@
         .stat-item span { font-size: 13px; font-weight: 500; color: #eaecef; }
         .positive { color: #0ecb81; }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -216,9 +202,7 @@
             justify-content: center;
             align-items: center;
         }
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
         .modal-content {
             background: #1e2329;
             border-radius: 24px;
@@ -250,10 +234,6 @@
             justify-content: center;
             animation: pulse 1s infinite;
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
         .convert-input {
             background: #2b2f36;
             border: 1px solid #3b424d;
@@ -272,46 +252,6 @@
             font-weight: bold;
             letter-spacing: 2px;
             margin: 15px 0;
-        }
-        .google-btn {
-            background: #fff;
-            color: #757575;
-            border: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            font-weight: 500;
-        }
-        .google-btn:hover {
-            background: #f5f5f5;
-            transform: translateY(-1px);
-        }
-        .google-btn img {
-            width: 20px;
-            height: 20px;
-        }
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #3b424d;
-        }
-        .divider span {
-            padding: 0 10px;
-            color: #848e9c;
-            font-size: 12px;
         }
     </style>
 </head>
@@ -370,13 +310,6 @@
             </div>
 
             <div id="signup-form" class="hidden">
-                <button onclick="handleGoogleSignup()" class="google-btn mb-4">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                    <span>Create account with Gmail</span>
-                </button>
-                <div class="divider">
-                    <span>or</span>
-                </div>
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Email address</label>
                     <div class="input-bg rounded-xl p-3 flex items-center">
@@ -389,16 +322,16 @@
                     <div class="input-bg rounded-xl p-3 flex items-center justify-between">
                         <div class="flex items-center w-full">
                             <i class="fa-solid fa-lock text-yellow-500 mr-3"></i>
-                            <input type="password" id="signup-password" placeholder="Password" class="bg-transparent w-full outline-none text-sm text-white">
+                            <input type="password" id="signup-password" placeholder="Create password" class="bg-transparent w-full outline-none text-sm text-white">
                         </div>
                         <i class="fa-regular fa-eye text-gray-500 cursor-pointer" onclick="togglePassword('signup-password', this)"></i>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm text-gray-400 mb-2">Referral ID (optional)</label>
-                    <div class="input-bg rounded-xl p-3">
-                        <i class="fa-solid fa-user-plus text-gray-500 mr-3"></i>
-                        <input type="text" id="signup-referral" placeholder="Referral ID" class="bg-transparent w-full outline-none text-sm text-gray-400">
+                    <label class="block text-sm text-gray-400 mb-2">Withdrawal PIN (6 digits)</label>
+                    <div class="input-bg rounded-xl p-3 flex items-center">
+                        <i class="fa-solid fa-key text-yellow-500 mr-3"></i>
+                        <input type="password" id="signup-pin" maxlength="6" placeholder="Enter 6-digit PIN" class="bg-transparent w-full outline-none text-sm text-white" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
                     </div>
                 </div>
                 <div class="flex items-start mb-6">
@@ -446,7 +379,6 @@
                 <div class="market-card-btc-clear rounded-2xl border border-gray-800/50 overflow-hidden h-36 relative"><div class="p-4 flex flex-col justify-between h-full relative z-10"><div><span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">BTC/USDT</span><p class="text-xl font-black mt-1" id="btc-price">70,509.00</p><p class="success-green text-[10px] font-bold" id="btc-change">+0.32%</p></div><svg class="w-full h-10 mt-2 overflow-visible" viewBox="0 0 100 40"><path class="sparkline" d="M0 38 L15 10 L30 25 L45 5 L60 20 L75 12 L90 28 L100 8" fill="none" stroke="#0ecb81" stroke-width="2.5" stroke-linejoin="round"/></svg></div></div></div>
                 <div class="grid grid-cols-2 gap-3 px-4 mb-8"><div class="card-fear-greed rounded-2xl border border-gray-800 p-4 shadow-lg h-32 flex flex-col justify-between"><div><span class="text-[9px] text-gray-400 font-black uppercase tracking-widest">Fear & Greed</span><div class="text-3xl font-black mt-1">30</div><span class="text-[10px] font-black text-orange-400 uppercase">Fear</span></div><div class="mt-2 h-1.5 w-full bg-gray-900 rounded-full overflow-hidden"><div class="h-full w-[30%] bg-orange-500"></div></div></div><div class="card-tags rounded-2xl border border-gray-800 p-4 flex flex-wrap gap-1.5 content-start h-32"><span class="px-2 py-1 rounded bg-[#0ecb81]/10 text-[#0ecb81] text-[8px] font-black border border-[#0ecb81]/20">STABLE</span><span class="px-2 py-1 rounded bg-white/5 text-gray-400 text-[8px] font-black border border-white/10">POWELL_SPEECH</span><span class="px-2 py-1 rounded bg-white/5 text-gray-400 text-[8px] font-black border border-white/10">BTC_HALVING</span></div></div>
                 
-                <!-- HOMEDOWN SECTION - Crypto Futures Table (BELOW main content) -->
                 <div class="homedown-section" id="homedownSection">
                     <div class="homedown-title">
                         <i data-lucide="flame"></i>
@@ -460,7 +392,6 @@
                     <div id="homedownCoinList"></div>
                 </div>
 
-                <!-- Copy Trading Section -->
                 <div class="copy-trading-section">
                     <div class="copy-trading-title">
                         <i data-lucide="users"></i>
@@ -527,7 +458,6 @@
 
     <div id="toast-message" class="toast-message"></div>
 
-    <!-- Modals -->
     <div id="convert-modal" class="modal">
         <div class="modal-content">
             <i data-lucide="x" class="modal-close" onclick="closeModal('convert-modal')" style="width: 20px; height: 20px;"></i>
@@ -592,14 +522,13 @@
     <script>
         lucide.createIcons();
         const SHEETDB_API = "https://sheetdb.io/api/v1/pw5rowfqub6av";
+        const NOTIFICATIONS_API = "https://sheetdb.io/api/v1/pw5rowfqub6av/notifications";
         let currentUserEmail = null;
         let currentBalance = 0;
         let notifications = [];
         let btcPrice = 67500;
         let balanceCheckInterval = null;
-        let sessionTimeout = null;
 
-        // HOMEDOWN DATA - Crypto Futures from homedown.html
         const homedownCoins = [
             { symbol: "BNB", price: 633.88, change: 1.20, isPositive: true },
             { symbol: "BTC", price: 70551.90, change: 3.80, isPositive: true },
@@ -608,7 +537,6 @@
             { symbol: "DOGE", price: 0.09361, change: 3.40, isPositive: true }
         ];
 
-        // Copy Trading Data
         const traders = [
             { name: "TikDarkCoder", img: "https://i.pravatar.cc/150?u=1", pnl: "26,858.56", roi: "2.68", aum: "1,030,119.67", win: "100.00", subs: "16" },
             { name: "TTMTT", img: "https://i.pravatar.cc/150?u=2", pnl: "327.81", roi: "42.51", aum: "120,284.44", win: "34.13", subs: "299" },
@@ -689,7 +617,6 @@
             });
         }
         
-        // Enhanced Market Data (from market.html)
         const symbols = ['BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'ADA', 'AVAX', 'DOT', 'LINK', 'TRX', 'MATIC', 'NEAR', 'UNI', 'LTC', 'ICP', 'FIL', 'ARB', 'ATOM', 'OP', 'VET', 'RENDER', 'IMX', 'KAS', 'TIA', 'STX', 'INJ', 'GRT', 'THETA', 'LDO', 'ALGO', 'AR', 'FET', 'AGLD', 'SYS', 'YGG', 'ILV', 'FIDA', 'RAD', 'RARE', 'LAZIO', 'ADX', 'ACM', 'ANKR', 'ASR', 'ATA', 'ATM', 'AUDIO', 'AVA', 'AXS', 'BNT'];
         const names = ['Bitcoin', 'Ethereum', 'BNB', 'Solana', 'Ripple', 'Cardano', 'Avalanche', 'Polkadot', 'Chainlink', 'TRON', 'Polygon', 'Near Protocol', 'Uniswap', 'Litecoin', 'Internet Computer', 'Filecoin', 'Arbitrum', 'Cosmos', 'Optimism', 'VeChain', 'Render', 'Immutable', 'Kaspa', 'Celestia', 'Stacks', 'Injective', 'The Graph', 'Theta', 'Lido DAO', 'Algorand', 'Arweave', 'Artificial Super...', 'Adventure Gold', 'Syscoin', 'Yield Guild Games', 'Illuvium', 'Bonfida', 'Radworks', 'SuperRare', 'Lazio Fan Token', 'AdEx', 'AC Milan Fan Token', 'Ankr', 'AS Roma Fan Token', 'Automata', 'Atletico Madrid', 'Audius', 'AVA', 'Axie Infinity', 'Bancor'];
 
@@ -804,7 +731,9 @@
         }
         
         function updateBalanceDisplay() {
-            document.getElementById('home-main-balance').innerText = `$${currentBalance.toLocaleString()}`;
+            if (!isHidden) {
+                document.getElementById('home-main-balance').innerText = `$${currentBalance.toLocaleString()}`;
+            }
             const btcEquivalent = (currentBalance / btcPrice).toFixed(8);
             document.getElementById('wallet-main-val').innerText = btcEquivalent;
             const walletUsdParagraph = document.querySelector('#view-wallets .card-bg p');
@@ -812,45 +741,48 @@
             updatePNL();
         }
         
-        function addNotification(message, amount = null) {
-            const notification = {
-                id: Date.now(),
-                message: message,
-                amount: amount,
-                timestamp: new Date().toLocaleString(),
-                read: false
-            };
-            notifications.unshift(notification);
-            const dot = document.getElementById('notification-dot');
-            if (dot) dot.style.display = 'flex';
-        }
-        
-        function resetSessionTimer() {
-            if (sessionTimeout) clearTimeout(sessionTimeout);
-            sessionTimeout = setTimeout(() => {
-                if (currentUserEmail) {
-                    logout();
+        async function loadNotifications() {
+            if (!currentUserEmail) return;
+            try {
+                const response = await fetch(`${SHEETDB_API}/notifications/search?Email=${encodeURIComponent(currentUserEmail)}`);
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    notifications = data.sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp));
+                } else {
+                    notifications = [];
                 }
-            }, 180000);
+                const dot = document.getElementById('notification-dot');
+                if (dot && notifications.length > 0) dot.style.display = 'flex';
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
         }
         
-        function logout() {
-            currentUserEmail = null;
-            currentBalance = 0;
-            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
-            if (sessionTimeout) clearTimeout(sessionTimeout);
-            localStorage.removeItem('binance_session');
-            document.getElementById('login-overlay').classList.add('active');
-            document.body.classList.remove('show-dashboard');
-            document.getElementById('login-email').value = '';
-            document.getElementById('login-password').value = '';
-            document.getElementById('login-agree').checked = false;
-            showToast('Session expired. Please login again.', false);
+        async function addNotification(message, amount = null) {
+            if (!currentUserEmail) return;
+            const notification = {
+                Email: currentUserEmail,
+                Message: message,
+                Amount: amount || '',
+                Timestamp: new Date().toLocaleString(),
+                Read: 'false'
+            };
+            try {
+                await fetch(`${SHEETDB_API}/notifications`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ data: notification })
+                });
+                await loadNotifications();
+                const dot = document.getElementById('notification-dot');
+                if (dot) dot.style.display = 'flex';
+            } catch (error) {
+                console.error('Error saving notification:', error);
+            }
         }
         
         async function checkBalanceUpdate() {
             if (!currentUserEmail) return;
-            
             try {
                 const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(currentUserEmail)}`);
                 const users = await response.json();
@@ -860,23 +792,14 @@
                         const oldBalance = currentBalance;
                         currentBalance = newBalance;
                         updateBalanceDisplay();
-                        
                         if (newBalance > oldBalance) {
                             const addedAmount = newBalance - oldBalance;
-                            addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
-                            showToast(`💰 Credit Alert: $${addedAmount.toLocaleString()} added!`, true);
+                            await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
+                            showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
                         } else if (newBalance < oldBalance) {
                             const deductedAmount = oldBalance - newBalance;
-                            addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
-                            showToast(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted!`, false);
+                            await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
                         }
-                        
-                        const sessionData = {
-                            email: currentUserEmail,
-                            balance: currentBalance,
-                            timestamp: Date.now()
-                        };
-                        localStorage.setItem('binance_session', JSON.stringify(sessionData));
                     }
                 }
             } catch (error) {
@@ -892,9 +815,9 @@
                 } else {
                     container.innerHTML = notifications.map(n => `
                         <div class="bg-[#2b3139] p-3 rounded-lg">
-                            <p class="text-sm text-white">${n.message}</p>
-                            ${n.amount ? `<p class="text-xs text-green-500 mt-1">$${n.amount.toLocaleString()}</p>` : ''}
-                            <p class="text-xs text-gray-500 mt-1">${n.timestamp}</p>
+                            <p class="text-sm text-white">${n.Message}</p>
+                            ${n.Amount ? `<p class="text-xs text-green-500 mt-1">$${parseFloat(n.Amount).toLocaleString()}</p>` : ''}
+                            <p class="text-xs text-gray-500 mt-1">${n.Timestamp}</p>
                         </div>
                     `).join('');
                 }
@@ -917,8 +840,9 @@
                         Timestamp: new Date().toLocaleString(),
                         Email: user.email,
                         Password: user.password,
+                        Pin: user.pin,
                         Referral: user.referral || '',
-                        Balance: user.balance || 0,
+                        Balance: 0,
                         Created_At: user.createdAt || new Date().toISOString()
                     }
                 })
@@ -940,10 +864,6 @@
             return user || null;
         }
         
-        function handleGoogleSignup() {
-            showToast('Google signup is a placeholder. Please use email signup.', false);
-        }
-        
         async function handleLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
@@ -958,27 +878,15 @@
                     currentUserEmail = email;
                     currentBalance = parseFloat(user.Balance) || 0;
                     updateBalanceDisplay();
+                    await loadNotifications();
                     showToast('Login successful!', true);
-                    
                     if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                     balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
-                    resetSessionTimer();
-                    
-                    const sessionData = {
-                        email: currentUserEmail,
-                        balance: currentBalance,
-                        timestamp: Date.now()
-                    };
-                    localStorage.setItem('binance_session', JSON.stringify(sessionData));
-                    
-                    document.getElementById('login-overlay').classList.remove('active');
-                    document.body.classList.add('show-dashboard');
-                    lucide.createIcons();
-                    
-                    document.addEventListener('click', resetSessionTimer);
-                    document.addEventListener('mousemove', resetSessionTimer);
-                    document.addEventListener('keypress', resetSessionTimer);
-                    document.addEventListener('scroll', resetSessionTimer);
+                    setTimeout(() => {
+                        document.getElementById('login-overlay').classList.remove('active');
+                        document.body.classList.add('show-dashboard');
+                        lucide.createIcons();
+                    }, 500);
                 } else { showToast('Invalid email or password', false); }
             } catch (error) { showToast('Login failed', false); }
             finally { setButtonLoading(loginBtn, false, 'Continue to Dashboard'); }
@@ -987,21 +895,22 @@
         async function handleSignup() {
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
-            const referral = document.getElementById('signup-referral').value.trim();
+            const pin = document.getElementById('signup-pin').value;
             const agree = document.getElementById('signup-agree').checked;
             const signupBtn = document.getElementById('signup-btn');
             if (!email || !password) { showToast('Please enter credentials', false); return; }
-            if (password.length < 6) { showToast('Password too short', false); return; }
+            if (password.length < 6) { showToast('Password must be at least 6 characters', false); return; }
+            if (!pin || pin.length !== 6) { showToast('Please enter a valid 6-digit withdrawal PIN', false); return; }
             if (!agree) { showToast('Please agree to Terms', false); return; }
             setButtonLoading(signupBtn, true, 'Create Account');
             try {
-                if (await userExists(email)) { showToast('Email exists', false); return; }
-                await addUserToSheet({ email, password, referral, createdAt: new Date().toISOString(), balance: 0 });
-                showToast('Account created!', true);
-                setTimeout(() => {
-                    document.getElementById('login-overlay').classList.remove('active');
-                    document.body.classList.add('show-dashboard');
-                }, 500);
+                if (await userExists(email)) { showToast('Email already exists', false); return; }
+                await addUserToSheet({ email, password, pin, referral: '', createdAt: new Date().toISOString() });
+                showToast('Account created successfully! Please login.', true);
+                toggleForms();
+                document.getElementById('signup-email').value = '';
+                document.getElementById('signup-password').value = '';
+                document.getElementById('signup-pin').value = '';
             } catch (error) { showToast('Signup failed', false); }
             finally { setButtonLoading(signupBtn, false, 'Create Account'); }
         }
@@ -1039,36 +948,17 @@
             openModal('convert-modal');
         }
         
-        function openEarnModal() {
-            openModal('earn-modal');
-        }
-        
+        function openEarnModal() { openModal('earn-modal'); }
         function copyReferralCode() {
             const code = document.getElementById('referral-code').innerText;
             navigator.clipboard.writeText(code);
             showToast('Referral code copied!', true);
         }
-        
-        function openSafetyModal() {
-            openModal('safety-modal');
-        }
-        
-        function openLaunchModal() {
-            openModal('launch-modal');
-        }
-        
-        function openMoreModal() {
-            openModal('more-modal');
-        }
-        
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-            lucide.createIcons();
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
+        function openSafetyModal() { openModal('safety-modal'); }
+        function openLaunchModal() { openModal('launch-modal'); }
+        function openMoreModal() { openModal('more-modal'); }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); lucide.createIcons(); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         
         function toggleForms() {
             const loginForm = document.getElementById('login-form');
@@ -1089,17 +979,14 @@
         function showView(viewId) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('[id^="nav-"]').forEach(n => { n.classList.remove('nav-item-active'); n.classList.add('text-gray-500'); });
-            
             document.getElementById('view-' + viewId).classList.add('active');
             document.getElementById('nav-' + viewId).classList.add('nav-item-active');
-            
             const header = document.getElementById('header-exchange');
             if(viewId === 'home' || viewId === 'wallets') {
                 header.style.display = 'block';
             } else {
                 header.style.display = 'none';
             }
-
             if(viewId === 'markets') {
                 renderMarketList(assets);
                 const searchInput = document.getElementById('coinSearch');
@@ -1113,7 +1000,6 @@
                     searchInput.addEventListener('input', window._marketSearchHandler);
                 }
             }
-
             const exBtn = document.getElementById('btn-exchange');
             const waBtn = document.getElementById('btn-wallet');
             if(viewId === 'home') {
@@ -1124,7 +1010,6 @@
                 exBtn.className = "px-5 py-2 text-gray-400 font-bold";
             }
             lucide.createIcons();
-            resetSessionTimer();
         }
         
         async function updateLiveTicker() {
@@ -1160,31 +1045,6 @@
             lucide.createIcons();
         }
         
-        function checkStoredSession() {
-            const stored = localStorage.getItem('binance_session');
-            if (stored) {
-                const session = JSON.parse(stored);
-                const elapsed = Date.now() - session.timestamp;
-                if (elapsed < 180000) {
-                    currentUserEmail = session.email;
-                    currentBalance = session.balance;
-                    updateBalanceDisplay();
-                    document.getElementById('login-overlay').classList.remove('active');
-                    document.body.classList.add('show-dashboard');
-                    lucide.createIcons();
-                    if (balanceCheckInterval) clearInterval(balanceCheckInterval);
-                    balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
-                    resetSessionTimer();
-                    document.addEventListener('click', resetSessionTimer);
-                    document.addEventListener('mousemove', resetSessionTimer);
-                    document.addEventListener('keypress', resetSessionTimer);
-                    document.addEventListener('scroll', resetSessionTimer);
-                } else {
-                    localStorage.removeItem('binance_session');
-                }
-            }
-        }
-        
         setInterval(updateLiveTicker, 5000);
         updateLiveTicker();
         startMarketPriceUpdates();
@@ -1195,10 +1055,7 @@
             setTimeout(() => {
                 document.body.classList.add('hide-loader');
                 setTimeout(() => {
-                    checkStoredSession();
-                    if (!currentUserEmail) {
-                        document.getElementById('login-overlay').classList.add('active');
-                    }
+                    document.getElementById('login-overlay').classList.add('active');
                 }, 800);
             }, 3200);
         });
