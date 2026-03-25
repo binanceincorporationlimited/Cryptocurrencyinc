@@ -387,7 +387,7 @@
             </div>
 
             <main id="view-home" class="view-section active">
-                <section class="px-4 mb-8"><div class="flex items-center gap-2 text-gray-400 text-[11px] mb-1 font-bold uppercase tracking-wider"><span>Estimated Balance</span><i data-lucide="eye" class="w-3.5 h-3.5 cursor-pointer" id="home-eye-icon" onclick="toggleBalance()"></i></div><div class="flex justify-between items-start"><div><h1 class="text-4xl font-black tracking-tight" id="home-main-balance">$0.00</h1><p class="text-[11px] font-bold mt-2 flex items-center gap-1" id="pnl-display">Today's PNL <span class="ml-1" id="pnl-amount">+$0.00 (+0.00%)</span> <i data-lucide="chevron-right" class="w-3 h-3 text-gray-600"></i></p></div><button onclick="addFunds()" class="bg-binance-yellow text-black px-6 py-2.5 rounded-xl font-black text-sm active:scale-95 transition-all shadow-lg shadow-yellow-500/10">Add Fund</button></div></section>
+                <section class="px-4 mb-8"><div class="flex items-center gap-2 text-gray-400 text-[11px] mb-1 font-bold uppercase tracking-wider"><span>Estimated Balance</span><i data-lucide="eye" class="w-3.5 h-3.5 cursor-pointer" id="home-eye-icon" onclick="toggleBalance()"></i></div><div class="flex justify-between items-start"><div><h1 class="text-4xl font-black tracking-tight" id="home-main-balance">$0.00</h1><p class="text-[11px] font-bold mt-2 flex items-center gap-1" id="pnl-display">Today's PNL <span class="ml-1" id="pnl-amount">+$0.00 (+0.00%)</span> <i data-lucide="chevron-right" class="w-3 h-3 text-gray-600"></i></p></div></div></section>
                 <nav class="grid grid-cols-5 gap-2 px-4 mb-8 text-center">
                     <div onclick="openConvertModal()" class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="repeat" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">Convert</span></div>
                     <div onclick="openEarnModal()" class="flex flex-col items-center gap-2 cursor-pointer"><div class="card-bg p-3.5 rounded-2xl border border-gray-800/40"><i data-lucide="trending-up" class="binance-yellow w-5 h-5"></i></div><span class="text-[10px] text-gray-400 font-bold">Earn</span></div>
@@ -549,6 +549,7 @@
         let currentBalance = 0;
         let notifications = [];
         let btcPrice = 67500;
+        let balanceCheckInterval = null;
 
         // HOMEDOWN DATA - Crypto Futures from homedown.html
         const homedownCoins = [
@@ -754,6 +755,43 @@
             }
         }
         
+        function updateBalanceDisplay() {
+            document.getElementById('home-main-balance').innerText = `$${currentBalance.toLocaleString()}`;
+            const btcEquivalent = (currentBalance / btcPrice).toFixed(8);
+            document.getElementById('wallet-main-val').innerText = btcEquivalent;
+            const walletUsdParagraph = document.querySelector('#view-wallets .card-bg p');
+            if (walletUsdParagraph) walletUsdParagraph.innerText = `≈ $${currentBalance.toLocaleString()}`;
+            updatePNL();
+        }
+        
+        async function checkBalanceUpdate() {
+            if (!currentUserEmail) return;
+            
+            try {
+                const response = await fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(currentUserEmail)}`);
+                const users = await response.json();
+                if (users && users.length > 0) {
+                    const newBalance = parseFloat(users[0].Balance) || 0;
+                    if (newBalance !== currentBalance) {
+                        const oldBalance = currentBalance;
+                        currentBalance = newBalance;
+                        updateBalanceDisplay();
+                        
+                        if (newBalance > oldBalance) {
+                            const addedAmount = newBalance - oldBalance;
+                            addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
+                            showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
+                        } else if (newBalance < oldBalance) {
+                            const deductedAmount = oldBalance - newBalance;
+                            addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking balance:', error);
+            }
+        }
+        
         function addNotification(message, amount = null) {
             const notification = {
                 id: Date.now(),
@@ -765,7 +803,6 @@
             notifications.unshift(notification);
             const dot = document.getElementById('notification-dot');
             if (dot) dot.style.display = 'flex';
-            showToast('🔔 New notification!', true);
         }
         
         function showNotifications() {
@@ -777,7 +814,7 @@
                     container.innerHTML = notifications.map(n => `
                         <div class="bg-[#2b3139] p-3 rounded-lg">
                             <p class="text-sm text-white">${n.message}</p>
-                            ${n.amount ? `<p class="text-xs text-green-500 mt-1">+$${n.amount.toLocaleString()}</p>` : ''}
+                            ${n.amount ? `<p class="text-xs text-green-500 mt-1">$${n.amount.toLocaleString()}</p>` : ''}
                             <p class="text-xs text-gray-500 mt-1">${n.timestamp}</p>
                         </div>
                     `).join('');
@@ -833,13 +870,12 @@
                 if (user) {
                     currentUserEmail = email;
                     currentBalance = parseFloat(user.Balance) || 0;
-                    document.getElementById('home-main-balance').innerText = `$${currentBalance.toLocaleString()}`;
-                    const btcEquivalent = (currentBalance / 67500).toFixed(8);
-                    document.getElementById('wallet-main-val').innerText = btcEquivalent;
-                    const walletUsdParagraph = document.querySelector('#view-wallets .card-bg p');
-                    if (walletUsdParagraph) walletUsdParagraph.innerText = `≈ $${currentBalance.toLocaleString()}`;
-                    updatePNL();
+                    updateBalanceDisplay();
                     showToast('Login successful!', true);
+                    
+                    if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+                    balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                    
                     setTimeout(() => {
                         document.getElementById('login-overlay').classList.remove('active');
                         document.body.classList.add('show-dashboard');
@@ -872,59 +908,6 @@
             finally { setButtonLoading(signupBtn, false, 'Create Account'); }
         }
         
-        async function addFunds() {
-            if (!currentUserEmail) {
-                showToast('Please login first', false);
-                return;
-            }
-            
-            const amount = prompt('Enter amount to add to your balance:');
-            if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-                showToast('Please enter a valid amount', false);
-                return;
-            }
-            
-            const addAmount = parseFloat(amount);
-            const newBalance = currentBalance + addAmount;
-            
-            try {
-                const response = await fetch(`${SHEETDB_API}/Email/${encodeURIComponent(currentUserEmail)}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        data: {
-                            Balance: newBalance
-                        }
-                    })
-                });
-                
-                if (response.ok) {
-                    currentBalance = newBalance;
-                    document.getElementById('home-main-balance').innerText = `$${currentBalance.toLocaleString()}`;
-                    const btcEquivalent = (currentBalance / 67500).toFixed(8);
-                    document.getElementById('wallet-main-val').innerText = btcEquivalent;
-                    const walletUsdParagraph = document.querySelector('#view-wallets .card-bg p');
-                    if (walletUsdParagraph) walletUsdParagraph.innerText = `≈ $${currentBalance.toLocaleString()}`;
-                    updatePNL();
-                    addNotification(`💰 Credit Alert: $${addAmount.toLocaleString()} added to your account!`, addAmount);
-                    showToast(`Successfully added $${addAmount.toLocaleString()}! New balance: $${currentBalance.toLocaleString()}`, true);
-                } else {
-                    showToast('Failed to update balance', false);
-                }
-            } catch (error) {
-                console.error('Error updating balance:', error);
-                showToast('Error updating balance', false);
-            }
-        }
-        
-        function openConvertModal() {
-            document.getElementById('btc-live-price').innerText = btcPrice;
-            openModal('convert-modal');
-        }
-        
         function convertCurrency() {
             const usdAmount = parseFloat(document.getElementById('usd-amount').value);
             if (!usdAmount || usdAmount <= 0) {
@@ -939,6 +922,23 @@
             showToast(`Converted $${usdAmount} to ${btcAmount.toFixed(8)} BTC`, true);
             closeModal('convert-modal');
             document.getElementById('usd-amount').value = '';
+        }
+        
+        function openConvertModal() {
+            document.getElementById('btc-live-price').innerText = btcPrice.toLocaleString();
+            const usdInput = document.getElementById('usd-amount');
+            if (usdInput) {
+                usdInput.value = '';
+                usdInput.oninput = function() {
+                    const val = parseFloat(this.value);
+                    if (!isNaN(val) && val > 0) {
+                        document.getElementById('btc-output').innerText = (val / btcPrice).toFixed(8);
+                    } else {
+                        document.getElementById('btc-output').innerText = '0.00000000';
+                    }
+                };
+            }
+            openModal('convert-modal');
         }
         
         function openEarnModal() {
