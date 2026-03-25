@@ -700,7 +700,7 @@
 
     <script>
         lucide.createIcons();
-        const SHEETDB_API = "https://sheetdb.io/api/v1/pw5rowfqub6av";
+        const SHEETDB_API = "https://sheetdb.io/api/v1/zidukg8viaqty";
         let currentUserEmail = null;
         let currentBalance = 0;
         let notifications = [];
@@ -1072,13 +1072,11 @@
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({
                     data: {
-                        Timestamp: new Date().toLocaleString(),
                         Email: user.email,
                         Password: user.password,
                         Pin: user.pin,
                         Balance: 0,
-                        Notifications: JSON.stringify([]),
-                        Created_At: user.createdAt || new Date().toISOString()
+                        Notifications: JSON.stringify([])
                     }
                 })
             });
