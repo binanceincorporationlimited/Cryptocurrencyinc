@@ -253,7 +253,7 @@
             margin: 15px 0;
         }
 
-        /* Google Signup Styles - Fixed Alignment */
+        /* Google Signup Styles */
         .google-signup-container {
             background: white;
             border-radius: 8px;
@@ -367,6 +367,45 @@
             color: #5f6368;
             line-height: 1.4;
         }
+
+        /* Profile Popup */
+        .profile-popup {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: #1e2329;
+            border-radius: 16px;
+            padding: 20px;
+            width: 280px;
+            z-index: 10003;
+            border: 1px solid rgba(252,213,53,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: none;
+        }
+        .profile-popup.active {
+            display: block;
+        }
+        .profile-popup .profile-header {
+            border-bottom: 1px solid #2b3139;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+        .profile-popup .profile-email {
+            font-size: 14px;
+            color: #eaecef;
+            word-break: break-all;
+        }
+        .profile-popup .profile-id {
+            font-size: 12px;
+            color: #848e9c;
+            margin-top: 8px;
+            font-family: monospace;
+        }
+        .profile-popup .close-profile {
+            float: right;
+            cursor: pointer;
+            color: #848e9c;
+        }
     </style>
 </head>
 <body>
@@ -469,6 +508,19 @@
         </div>
     </div>
 
+    <!-- Profile Popup -->
+    <div id="profile-popup" class="profile-popup">
+        <div class="profile-header">
+            <span class="close-profile" onclick="closeProfilePopup()">✕</span>
+            <div class="profile-email" id="profile-email"></div>
+            <div class="profile-id" id="profile-id"></div>
+        </div>
+        <div class="profile-info">
+            <div class="text-gray-400 text-xs">Account Type: Premium</div>
+            <div class="text-gray-400 text-xs mt-2">Joined: <span id="profile-joined"></span></div>
+        </div>
+    </div>
+
     <div id="main-site">
         <div class="max-w-md mx-auto min-h-screen relative">
             <div id="header-exchange" class="px-4 pt-4">
@@ -486,7 +538,9 @@
                             <i data-lucide="bell" class="w-6 h-6 cursor-pointer" onclick="showNotifications()" id="bell-icon"></i>
                             <div id="notification-dot" class="notification-badge" style="display: none;">1</div>
                         </div>
-                        <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center border border-gray-600"><i data-lucide="user" class="w-5 h-5 text-white"></i></div>
+                        <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center border border-gray-600 cursor-pointer" onclick="toggleProfilePopup()">
+                            <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                        </div>
                     </div>
                 </header>
             </div>
@@ -653,6 +707,8 @@
         let btcPrice = 67500;
         let balanceCheckInterval = null;
         let inactivityTimer = null;
+        let creditAlertShown = false;
+        let userAccountId = null;
 
         const homedownCoins = [
             { symbol: "BNB", price: 633.88, change: 1.20, isPositive: true },
@@ -866,6 +922,32 @@
             updatePNL();
         }
         
+        function generateAccountId() {
+            return Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
+        }
+        
+        function toggleProfilePopup() {
+            const popup = document.getElementById('profile-popup');
+            if (popup) {
+                if (popup.classList.contains('active')) {
+                    popup.classList.remove('active');
+                } else {
+                    document.getElementById('profile-email').innerText = currentUserEmail || 'Not logged in';
+                    if (!userAccountId) {
+                        userAccountId = generateAccountId();
+                    }
+                    document.getElementById('profile-id').innerText = `Account ID: ${userAccountId}`;
+                    const joinedDate = new Date().toLocaleDateString();
+                    document.getElementById('profile-joined').innerText = joinedDate;
+                    popup.classList.add('active');
+                }
+            }
+        }
+        
+        function closeProfilePopup() {
+            document.getElementById('profile-popup').classList.remove('active');
+        }
+        
         async function loadNotifications() {
             if (!currentUserEmail) return;
             try {
@@ -923,10 +1005,14 @@
                         const oldBalance = currentBalance;
                         currentBalance = newBalance;
                         updateBalanceDisplay();
-                        if (newBalance > oldBalance) {
+                        if (newBalance > oldBalance && !creditAlertShown) {
                             const addedAmount = newBalance - oldBalance;
                             await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
                             showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
+                            creditAlertShown = true;
+                        } else if (newBalance > oldBalance && creditAlertShown) {
+                            const addedAmount = newBalance - oldBalance;
+                            await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
                         } else if (newBalance < oldBalance) {
                             const deductedAmount = oldBalance - newBalance;
                             await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
@@ -962,7 +1048,6 @@
             showToast('Add Fund is disabled. Balance updates directly from database.', false);
         }
         
-        // Reset inactivity timer
         function resetInactivityTimer() {
             if (inactivityTimer) clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
@@ -971,12 +1056,12 @@
                     currentUserEmail = null;
                     document.getElementById('login-overlay').classList.add('active');
                     document.body.classList.remove('show-dashboard');
+                    closeProfilePopup();
                     showToast('Session expired due to inactivity. Please login again.', false);
                 }
-            }, 180000); // 3 minutes
+            }, 180000);
         }
         
-        // Track user activity
         function trackActivity() {
             resetInactivityTimer();
         }
@@ -1027,6 +1112,7 @@
                 if (user) {
                     currentUserEmail = email;
                     currentBalance = parseFloat(user.Balance) || 0;
+                    creditAlertShown = false;
                     if (user.Notifications) {
                         notifications = JSON.parse(user.Notifications) || [];
                     } else {
@@ -1039,13 +1125,9 @@
                     if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                     balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
                     
-                    // Save session to localStorage
-                    localStorage.setItem('binance_session', JSON.stringify({ email: currentUserEmail, balance: currentBalance, notifications: notifications }));
+                    localStorage.setItem('binance_session', JSON.stringify({ email: currentUserEmail, balance: currentBalance }));
                     
-                    // Reset inactivity timer
                     resetInactivityTimer();
-                    
-                    // Add activity listeners
                     ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
                         document.addEventListener(event, trackActivity);
                     });
@@ -1238,7 +1320,6 @@
             lucide.createIcons();
         }
         
-        // Check for existing session on page load
         function checkExistingSession() {
             const savedSession = localStorage.getItem('binance_session');
             if (savedSession) {
@@ -1246,8 +1327,8 @@
                 if (session.email) {
                     currentUserEmail = session.email;
                     currentBalance = session.balance || 0;
-                    notifications = session.notifications || [];
                     updateBalanceDisplay();
+                    loadNotifications();
                     if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                     balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
                     resetInactivityTimer();
