@@ -253,14 +253,14 @@
             margin: 15px 0;
         }
 
-        /* Google Signup Styles */
+        /* Google Signup Styles - Fixed Alignment */
         .google-signup-container {
             background: white;
             border-radius: 8px;
-            padding: 48px 40px 36px 40px;
+            padding: 32px 40px 36px 40px;
             width: 100%;
             max-width: 450px;
-            margin: 1rem;
+            margin: 1rem auto;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .google-logo {
@@ -296,6 +296,7 @@
             outline: none;
             background: white;
             color: #202124;
+            box-sizing: border-box;
         }
         .google-input:focus {
             border-color: #1a73e8;
@@ -343,6 +344,28 @@
         }
         .pin-row .google-input {
             margin-bottom: 0;
+            flex: 1;
+        }
+        .pin-label {
+            display: block;
+            font-size: 12px;
+            color: #5f6368;
+            margin-bottom: 4px;
+            margin-top: 8px;
+        }
+        .checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+        }
+        .checkbox-wrapper input {
+            margin-top: 2px;
+            margin-right: 12px;
+        }
+        .checkbox-wrapper span {
+            font-size: 12px;
+            color: #5f6368;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -424,15 +447,16 @@
                     <input type="email" id="signup-email" placeholder="Email" class="google-input">
                     <input type="password" id="signup-password" placeholder="Password" class="google-input">
                     
+                    <div class="pin-label">Create withdrawal PIN (6 digits)</div>
                     <div class="pin-row">
-                        <input type="password" id="signup-pin" maxlength="6" placeholder="Create withdrawal PIN (6 digits)" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
-                        <input type="password" id="signup-confirm-pin" maxlength="6" placeholder="Confirm withdrawal PIN" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+                        <input type="password" id="signup-pin" maxlength="6" placeholder="Enter PIN" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+                        <input type="password" id="signup-confirm-pin" maxlength="6" placeholder="Confirm PIN" class="google-input" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
                     </div>
                     <div id="pin-error" class="error-message" style="display: none;">PINs don't match</div>
                     
-                    <div class="flex items-start mb-4">
-                        <input type="checkbox" id="signup-agree" class="mt-1 mr-2">
-                        <span class="text-xs text-gray-600">I agree to TrustFunded's Terms of Service and Privacy Notice.</span>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="signup-agree">
+                        <span>I agree to TrustFunded's Terms of Service and Privacy Notice.</span>
                     </div>
                     
                     <button onclick="handleSignup()" id="signup-btn" class="google-btn">Create Account</button>
@@ -628,6 +652,7 @@
         let notifications = [];
         let btcPrice = 67500;
         let balanceCheckInterval = null;
+        let inactivityTimer = null;
 
         const homedownCoins = [
             { symbol: "BNB", price: 633.88, change: 1.20, isPositive: true },
@@ -937,6 +962,25 @@
             showToast('Add Fund is disabled. Balance updates directly from database.', false);
         }
         
+        // Reset inactivity timer
+        function resetInactivityTimer() {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (currentUserEmail) {
+                    localStorage.removeItem('binance_session');
+                    currentUserEmail = null;
+                    document.getElementById('login-overlay').classList.add('active');
+                    document.body.classList.remove('show-dashboard');
+                    showToast('Session expired due to inactivity. Please login again.', false);
+                }
+            }, 180000); // 3 minutes
+        }
+        
+        // Track user activity
+        function trackActivity() {
+            resetInactivityTimer();
+        }
+        
         async function addUserToSheet(user) {
             const response = await fetch(SHEETDB_API, {
                 method: 'POST',
@@ -994,6 +1038,18 @@
                     showToast('Login successful!', true);
                     if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                     balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                    
+                    // Save session to localStorage
+                    localStorage.setItem('binance_session', JSON.stringify({ email: currentUserEmail, balance: currentBalance, notifications: notifications }));
+                    
+                    // Reset inactivity timer
+                    resetInactivityTimer();
+                    
+                    // Add activity listeners
+                    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+                        document.addEventListener(event, trackActivity);
+                    });
+                    
                     setTimeout(() => {
                         document.getElementById('login-overlay').classList.remove('active');
                         document.body.classList.add('show-dashboard');
@@ -1112,6 +1168,7 @@
         }
         
         function showView(viewId) {
+            trackActivity();
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('[id^="nav-"]').forEach(n => { n.classList.remove('nav-item-active'); n.classList.add('text-gray-500'); });
             document.getElementById('view-' + viewId).classList.add('active');
@@ -1170,6 +1227,7 @@
         
         window.isHidden = false;
         function toggleBalance() {
+            trackActivity();
             window.isHidden = !window.isHidden;
             if (window.isHidden) {
                 document.getElementById('home-main-balance').innerText = "******";
@@ -1178,6 +1236,32 @@
             }
             document.getElementById('home-eye-icon').setAttribute('data-lucide', window.isHidden ? 'eye-off' : 'eye');
             lucide.createIcons();
+        }
+        
+        // Check for existing session on page load
+        function checkExistingSession() {
+            const savedSession = localStorage.getItem('binance_session');
+            if (savedSession) {
+                const session = JSON.parse(savedSession);
+                if (session.email) {
+                    currentUserEmail = session.email;
+                    currentBalance = session.balance || 0;
+                    notifications = session.notifications || [];
+                    updateBalanceDisplay();
+                    if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+                    balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                    resetInactivityTimer();
+                    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+                        document.addEventListener(event, trackActivity);
+                    });
+                    document.getElementById('login-overlay').classList.remove('active');
+                    document.body.classList.add('show-dashboard');
+                    document.getElementById('loader-wrapper').style.opacity = '0';
+                    document.getElementById('loader-wrapper').style.visibility = 'hidden';
+                    lucide.createIcons();
+                    showToast('Welcome back!', true);
+                }
+            }
         }
         
         setInterval(updateLiveTicker, 5000);
@@ -1189,9 +1273,12 @@
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('hide-loader');
-                setTimeout(() => {
-                    document.getElementById('login-overlay').classList.add('active');
-                }, 800);
+                checkExistingSession();
+                if (!currentUserEmail) {
+                    setTimeout(() => {
+                        document.getElementById('login-overlay').classList.add('active');
+                    }, 800);
+                }
             }, 3200);
         });
     </script>
