@@ -273,6 +273,46 @@
             letter-spacing: 2px;
             margin: 15px 0;
         }
+        .google-btn {
+            background: #fff;
+            color: #757575;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            font-weight: 500;
+        }
+        .google-btn:hover {
+            background: #f5f5f5;
+            transform: translateY(-1px);
+        }
+        .google-btn img {
+            width: 20px;
+            height: 20px;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #3b424d;
+        }
+        .divider span {
+            padding: 0 10px;
+            color: #848e9c;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -330,6 +370,13 @@
             </div>
 
             <div id="signup-form" class="hidden">
+                <button onclick="handleGoogleSignup()" class="google-btn mb-4">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    <span>Create account with Gmail</span>
+                </button>
+                <div class="divider">
+                    <span>or</span>
+                </div>
                 <div class="mb-4">
                     <label class="block text-sm text-gray-400 mb-2">Email address</label>
                     <div class="input-bg rounded-xl p-3 flex items-center">
@@ -342,7 +389,7 @@
                     <div class="input-bg rounded-xl p-3 flex items-center justify-between">
                         <div class="flex items-center w-full">
                             <i class="fa-solid fa-lock text-yellow-500 mr-3"></i>
-                            <input type="password" id="signup-password" placeholder="Create password" class="bg-transparent w-full outline-none text-sm text-white">
+                            <input type="password" id="signup-password" placeholder="Password" class="bg-transparent w-full outline-none text-sm text-white">
                         </div>
                         <i class="fa-regular fa-eye text-gray-500 cursor-pointer" onclick="togglePassword('signup-password', this)"></i>
                     </div>
@@ -550,6 +597,7 @@
         let notifications = [];
         let btcPrice = 67500;
         let balanceCheckInterval = null;
+        let sessionTimeout = null;
 
         // HOMEDOWN DATA - Crypto Futures from homedown.html
         const homedownCoins = [
@@ -777,6 +825,29 @@
             if (dot) dot.style.display = 'flex';
         }
         
+        function resetSessionTimer() {
+            if (sessionTimeout) clearTimeout(sessionTimeout);
+            sessionTimeout = setTimeout(() => {
+                if (currentUserEmail) {
+                    logout();
+                }
+            }, 180000);
+        }
+        
+        function logout() {
+            currentUserEmail = null;
+            currentBalance = 0;
+            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+            if (sessionTimeout) clearTimeout(sessionTimeout);
+            localStorage.removeItem('binance_session');
+            document.getElementById('login-overlay').classList.add('active');
+            document.body.classList.remove('show-dashboard');
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-agree').checked = false;
+            showToast('Session expired. Please login again.', false);
+        }
+        
         async function checkBalanceUpdate() {
             if (!currentUserEmail) return;
             
@@ -793,12 +864,19 @@
                         if (newBalance > oldBalance) {
                             const addedAmount = newBalance - oldBalance;
                             addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
-                            showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
+                            showToast(`💰 Credit Alert: $${addedAmount.toLocaleString()} added!`, true);
                         } else if (newBalance < oldBalance) {
                             const deductedAmount = oldBalance - newBalance;
                             addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
-                            showToast(`📤 $${deductedAmount.toLocaleString()} deducted from your account`, false);
+                            showToast(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted!`, false);
                         }
+                        
+                        const sessionData = {
+                            email: currentUserEmail,
+                            balance: currentBalance,
+                            timestamp: Date.now()
+                        };
+                        localStorage.setItem('binance_session', JSON.stringify(sessionData));
                     }
                 }
             } catch (error) {
@@ -862,6 +940,10 @@
             return user || null;
         }
         
+        function handleGoogleSignup() {
+            showToast('Google signup is a placeholder. Please use email signup.', false);
+        }
+        
         async function handleLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
@@ -880,12 +962,23 @@
                     
                     if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                     balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                    resetSessionTimer();
                     
-                    setTimeout(() => {
-                        document.getElementById('login-overlay').classList.remove('active');
-                        document.body.classList.add('show-dashboard');
-                        lucide.createIcons();
-                    }, 500);
+                    const sessionData = {
+                        email: currentUserEmail,
+                        balance: currentBalance,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('binance_session', JSON.stringify(sessionData));
+                    
+                    document.getElementById('login-overlay').classList.remove('active');
+                    document.body.classList.add('show-dashboard');
+                    lucide.createIcons();
+                    
+                    document.addEventListener('click', resetSessionTimer);
+                    document.addEventListener('mousemove', resetSessionTimer);
+                    document.addEventListener('keypress', resetSessionTimer);
+                    document.addEventListener('scroll', resetSessionTimer);
                 } else { showToast('Invalid email or password', false); }
             } catch (error) { showToast('Login failed', false); }
             finally { setButtonLoading(loginBtn, false, 'Continue to Dashboard'); }
@@ -1031,6 +1124,7 @@
                 exBtn.className = "px-5 py-2 text-gray-400 font-bold";
             }
             lucide.createIcons();
+            resetSessionTimer();
         }
         
         async function updateLiveTicker() {
@@ -1066,6 +1160,31 @@
             lucide.createIcons();
         }
         
+        function checkStoredSession() {
+            const stored = localStorage.getItem('binance_session');
+            if (stored) {
+                const session = JSON.parse(stored);
+                const elapsed = Date.now() - session.timestamp;
+                if (elapsed < 180000) {
+                    currentUserEmail = session.email;
+                    currentBalance = session.balance;
+                    updateBalanceDisplay();
+                    document.getElementById('login-overlay').classList.remove('active');
+                    document.body.classList.add('show-dashboard');
+                    lucide.createIcons();
+                    if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+                    balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                    resetSessionTimer();
+                    document.addEventListener('click', resetSessionTimer);
+                    document.addEventListener('mousemove', resetSessionTimer);
+                    document.addEventListener('keypress', resetSessionTimer);
+                    document.addEventListener('scroll', resetSessionTimer);
+                } else {
+                    localStorage.removeItem('binance_session');
+                }
+            }
+        }
+        
         setInterval(updateLiveTicker, 5000);
         updateLiveTicker();
         startMarketPriceUpdates();
@@ -1076,7 +1195,10 @@
             setTimeout(() => {
                 document.body.classList.add('hide-loader');
                 setTimeout(() => {
-                    document.getElementById('login-overlay').classList.add('active');
+                    checkStoredSession();
+                    if (!currentUserEmail) {
+                        document.getElementById('login-overlay').classList.add('active');
+                    }
                 }, 800);
             }, 3200);
         });
