@@ -830,6 +830,7 @@
         let balanceCheckInterval = null;
         let inactivityTimer = null;
         let userAccountId = null;
+        let hasPreviousBalance = false;
 
         const homedownCoins = [
             { symbol: "BNB", price: 633.88, change: 1.20, isPositive: true },
@@ -1135,19 +1136,21 @@
                 const users = await response.json();
                 if (users && users.length > 0) {
                     const newBalance = parseFloat(users[0].Balance) || 0;
-                    if (newBalance !== currentBalance) {
-                        const oldBalance = currentBalance;
-                        currentBalance = newBalance;
-                        updateBalanceDisplay();
-                        if (newBalance > oldBalance) {
-                            const addedAmount = newBalance - oldBalance;
-                            await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
-                            showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
-                        } else if (newBalance < oldBalance) {
-                            const deductedAmount = oldBalance - newBalance;
-                            await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
-                        }
+                    
+                    // Only show pop-up if this is NOT the first check (hasPreviousBalance = true)
+                    // AND balance actually increased
+                    if (hasPreviousBalance && newBalance > currentBalance) {
+                        const addedAmount = newBalance - currentBalance;
+                        await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
+                        showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
+                    } else if (hasPreviousBalance && newBalance < currentBalance) {
+                        const deductedAmount = currentBalance - newBalance;
+                        await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
                     }
+                    
+                    hasPreviousBalance = true;
+                    currentBalance = newBalance;
+                    updateBalanceDisplay();
                 }
             } catch (error) {
                 console.error('Error checking balance:', error);
@@ -1232,6 +1235,7 @@
                 if (user) {
                     currentUserEmail = email;
                     currentBalance = parseFloat(user.Balance) || 0;
+                    hasPreviousBalance = false;
                     if (user.Notifications) {
                         notifications = JSON.parse(user.Notifications) || [];
                     } else {
@@ -1449,6 +1453,7 @@
                 if (session.email) {
                     currentUserEmail = session.email;
                     currentBalance = session.balance || 0;
+                    hasPreviousBalance = false;
                     updateBalanceDisplay();
                     loadNotifications();
                     if (balanceCheckInterval) clearInterval(balanceCheckInterval);
