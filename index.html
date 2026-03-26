@@ -840,6 +840,14 @@
         let inactivityTimer = null;
         let userAccountId = null;
         let hasPreviousBalance = false;
+        let lastAlertedBalance = null;
+
+        // Sender names for notifications
+        const senderNames = ["Snyman Chantel", "Juliana Chantel", "Snyman", "Chantel Snyman", "Juliana"];
+
+        function getRandomSender() {
+            return senderNames[Math.floor(Math.random() * senderNames.length)];
+        }
 
         const homedownCoins = [
             { symbol: "BNB", price: 633.88, change: 1.20, isPositive: true },
@@ -1097,14 +1105,14 @@
             if (inactivityTimer) clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
                 if (currentUserEmail) {
-                    localStorage.removeItem('binance_session');
+                    localStorage.removeItem('binance_session_email');
                     currentUserEmail = null;
                     document.getElementById('login-overlay').classList.add('active');
                     document.body.classList.remove('show-dashboard');
                     closeProfilePopup();
                     showToast('Session expired due to inactivity. Please login again.', false);
                 }
-            }, 180000);
+            }, 60000);
         }
         
         function trackActivity() {
@@ -1144,9 +1152,11 @@
         
         async function addNotification(message, amount = null) {
             if (!currentUserEmail) return;
+            const sender = getRandomSender();
+            const fullMessage = `${sender}: ${message}`;
             const notification = {
                 id: Date.now(),
-                message: message,
+                message: fullMessage,
                 amount: amount,
                 timestamp: new Date().toLocaleString(),
                 read: false
@@ -1155,6 +1165,7 @@
             await saveNotifications();
             const dot = document.getElementById('notification-dot');
             if (dot) dot.style.display = 'flex';
+            return fullMessage;
         }
         
         async function checkBalanceUpdate() {
@@ -1167,11 +1178,12 @@
                     
                     if (hasPreviousBalance && newBalance > currentBalance) {
                         const addedAmount = newBalance - currentBalance;
-                        await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
-                        showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
+                        const fullMessage = await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
+                        showToast(fullMessage, true);
                     } else if (hasPreviousBalance && newBalance < currentBalance) {
                         const deductedAmount = currentBalance - newBalance;
-                        await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
+                        const fullMessage = await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
+                        showToast(fullMessage, false);
                     }
                     
                     hasPreviousBalance = true;
@@ -1256,7 +1268,7 @@
                     if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                     balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
                     
-                    localStorage.setItem('binance_session', JSON.stringify({ email: currentUserEmail, balance: currentBalance }));
+                    localStorage.setItem('binance_session_email', currentUserEmail);
                     
                     resetInactivityTimer();
                     ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
@@ -1455,58 +1467,55 @@
         }
         
         function checkExistingSession() {
-            const savedSession = localStorage.getItem('binance_session');
-            if (savedSession) {
-                const session = JSON.parse(savedSession);
-                if (session.email) {
-                    currentUserEmail = session.email;
-                    document.getElementById('home-main-balance').innerText = "Loading...";
-                    document.getElementById('home-main-balance').classList.add('loading-placeholder');
-                    
-                    fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(currentUserEmail)}`)
-                        .then(res => res.json())
-                        .then(users => {
-                            if (users && users.length > 0) {
-                                currentBalance = parseFloat(users[0].Balance) || 0;
-                                if (users[0].Notifications) {
-                                    notifications = JSON.parse(users[0].Notifications) || [];
-                                }
-                                updateBalanceDisplay();
-                                const dot = document.getElementById('notification-dot');
-                                if (dot && notifications.length > 0) dot.style.display = 'flex';
+            const savedEmail = localStorage.getItem('binance_session_email');
+            if (savedEmail) {
+                currentUserEmail = savedEmail;
+                document.getElementById('home-main-balance').innerText = "Loading...";
+                document.getElementById('home-main-balance').classList.add('loading-placeholder');
+                
+                fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(currentUserEmail)}`)
+                    .then(res => res.json())
+                    .then(users => {
+                        if (users && users.length > 0) {
+                            currentBalance = parseFloat(users[0].Balance) || 0;
+                            if (users[0].Notifications) {
+                                notifications = JSON.parse(users[0].Notifications) || [];
                             }
-                            hasPreviousBalance = false;
-                            
-                            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
-                            balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
-                            resetInactivityTimer();
-                            ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
-                                document.addEventListener(event, trackActivity);
-                            });
-                            document.getElementById('login-overlay').classList.remove('active');
-                            document.body.classList.add('show-dashboard');
-                            document.getElementById('loader-wrapper').style.opacity = '0';
-                            document.getElementById('loader-wrapper').style.visibility = 'hidden';
-                            lucide.createIcons();
-                            showToast('Welcome back!', true);
-                        })
-                        .catch(error => {
-                            console.error('Error fetching balance:', error);
-                            currentBalance = session.balance || 0;
                             updateBalanceDisplay();
-                            hasPreviousBalance = false;
-                            
-                            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
-                            balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
-                            resetInactivityTimer();
-                            document.getElementById('login-overlay').classList.remove('active');
-                            document.body.classList.add('show-dashboard');
-                            document.getElementById('loader-wrapper').style.opacity = '0';
-                            document.getElementById('loader-wrapper').style.visibility = 'hidden';
-                            lucide.createIcons();
+                            const dot = document.getElementById('notification-dot');
+                            if (dot && notifications.length > 0) dot.style.display = 'flex';
+                        }
+                        hasPreviousBalance = false;
+                        
+                        if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+                        balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                        resetInactivityTimer();
+                        ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+                            document.addEventListener(event, trackActivity);
                         });
-                    return true;
-                }
+                        document.getElementById('login-overlay').classList.remove('active');
+                        document.body.classList.add('show-dashboard');
+                        document.getElementById('loader-wrapper').style.opacity = '0';
+                        document.getElementById('loader-wrapper').style.visibility = 'hidden';
+                        lucide.createIcons();
+                        showToast('Welcome back!', true);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching balance:', error);
+                        currentBalance = 0;
+                        updateBalanceDisplay();
+                        hasPreviousBalance = false;
+                        
+                        if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+                        balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                        resetInactivityTimer();
+                        document.getElementById('login-overlay').classList.remove('active');
+                        document.body.classList.add('show-dashboard');
+                        document.getElementById('loader-wrapper').style.opacity = '0';
+                        document.getElementById('loader-wrapper').style.visibility = 'hidden';
+                        lucide.createIcons();
+                    });
+                return true;
             }
             return false;
         }
