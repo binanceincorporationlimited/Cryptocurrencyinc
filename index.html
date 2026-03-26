@@ -829,7 +829,6 @@
         let btcPrice = 67500;
         let balanceCheckInterval = null;
         let inactivityTimer = null;
-        let creditAlertShown = false;
         let userAccountId = null;
 
         const homedownCoins = [
@@ -1140,14 +1139,10 @@
                         const oldBalance = currentBalance;
                         currentBalance = newBalance;
                         updateBalanceDisplay();
-                        if (newBalance > oldBalance && !creditAlertShown) {
+                        if (newBalance > oldBalance) {
                             const addedAmount = newBalance - oldBalance;
                             await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
                             showToast(`💰 $${addedAmount.toLocaleString()} credited to your account!`, true);
-                            creditAlertShown = true;
-                        } else if (newBalance > oldBalance && creditAlertShown) {
-                            const addedAmount = newBalance - oldBalance;
-                            await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
                         } else if (newBalance < oldBalance) {
                             const deductedAmount = oldBalance - newBalance;
                             await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
@@ -1237,7 +1232,6 @@
                 if (user) {
                     currentUserEmail = email;
                     currentBalance = parseFloat(user.Balance) || 0;
-                    creditAlertShown = false;
                     if (user.Notifications) {
                         notifications = JSON.parse(user.Notifications) || [];
                     } else {
