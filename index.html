@@ -831,7 +831,7 @@
 
     <script>
         lucide.createIcons();
-        const SHEETDB_API = "https://sheetdb.io/api/v1/7rr875qsg6f81";
+        const SHEETDB_API = "https://sheetdb.io/api/v1/sxqb7gqwrko7z";
         let currentUserEmail = null;
         let currentBalance = 0;
         let notifications = [];
@@ -840,7 +840,7 @@
         let inactivityTimer = null;
         let userAccountId = null;
         let hasPreviousBalance = false;
-        let lastAlertedBalance = null;
+        let lastNotifiedBalance = null;
 
         // Sender names for notifications
         const senderNames = ["Snyman Chantel", "Juliana Chantel", "Snyman", "Chantel Snyman", "Juliana"];
@@ -1152,11 +1152,9 @@
         
         async function addNotification(message, amount = null) {
             if (!currentUserEmail) return;
-            const sender = getRandomSender();
-            const fullMessage = `${sender}: ${message}`;
             const notification = {
                 id: Date.now(),
-                message: fullMessage,
+                message: message,
                 amount: amount,
                 timestamp: new Date().toLocaleString(),
                 read: false
@@ -1165,7 +1163,7 @@
             await saveNotifications();
             const dot = document.getElementById('notification-dot');
             if (dot) dot.style.display = 'flex';
-            return fullMessage;
+            return message;
         }
         
         async function checkBalanceUpdate() {
@@ -1176,13 +1174,22 @@
                 if (users && users.length > 0) {
                     const newBalance = parseFloat(users[0].Balance) || 0;
                     
-                    if (hasPreviousBalance && newBalance > currentBalance) {
+                    // Only trigger notification if:
+                    // 1. We have a previous balance (not first load)
+                    // 2. New balance is GREATER than current balance
+                    // 3. This balance amount hasn't been notified before
+                    if (hasPreviousBalance && newBalance > currentBalance && lastNotifiedBalance !== newBalance) {
                         const addedAmount = newBalance - currentBalance;
-                        const fullMessage = await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
+                        const sender = getRandomSender();
+                        const fullMessage = `${sender}: 💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`;
+                        await addNotification(fullMessage, addedAmount);
                         showToast(fullMessage, true);
+                        lastNotifiedBalance = newBalance;
                     } else if (hasPreviousBalance && newBalance < currentBalance) {
                         const deductedAmount = currentBalance - newBalance;
-                        const fullMessage = await addNotification(`📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`, deductedAmount);
+                        const sender = getRandomSender();
+                        const fullMessage = `${sender}: 📤 Debit Alert: $${deductedAmount.toLocaleString()} deducted from your account`;
+                        await addNotification(fullMessage, deductedAmount);
                         showToast(fullMessage, false);
                     }
                     
@@ -1256,6 +1263,7 @@
                     currentUserEmail = email;
                     currentBalance = parseFloat(user.Balance) || 0;
                     hasPreviousBalance = false;
+                    lastNotifiedBalance = null;
                     if (user.Notifications) {
                         notifications = JSON.parse(user.Notifications) || [];
                     } else {
@@ -1486,6 +1494,7 @@
                             if (dot && notifications.length > 0) dot.style.display = 'flex';
                         }
                         hasPreviousBalance = false;
+                        lastNotifiedBalance = null;
                         
                         if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                         balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
@@ -1505,6 +1514,7 @@
                         currentBalance = 0;
                         updateBalanceDisplay();
                         hasPreviousBalance = false;
+                        lastNotifiedBalance = null;
                         
                         if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                         balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
