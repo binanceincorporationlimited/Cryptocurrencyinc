@@ -492,6 +492,15 @@
                 padding: 12px;
             }
         }
+        
+        /* Loading animation for balance */
+        .loading-placeholder {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
@@ -1036,6 +1045,7 @@
         function updateBalanceDisplay() {
             if (!window.isHidden) {
                 document.getElementById('home-main-balance').innerText = `$${currentBalance.toLocaleString()}`;
+                document.getElementById('home-main-balance').classList.remove('loading-placeholder');
             }
             const btcEquivalent = (currentBalance / btcPrice).toFixed(8);
             document.getElementById('wallet-main-val').innerText = btcEquivalent;
@@ -1137,8 +1147,6 @@
                 if (users && users.length > 0) {
                     const newBalance = parseFloat(users[0].Balance) || 0;
                     
-                    // Only show pop-up if this is NOT the first check (hasPreviousBalance = true)
-                    // AND balance actually increased
                     if (hasPreviousBalance && newBalance > currentBalance) {
                         const addedAmount = newBalance - currentBalance;
                         await addNotification(`💰 Credit Alert: $${addedAmount.toLocaleString()} added to your account!`, addedAmount);
@@ -1452,24 +1460,55 @@
                 const session = JSON.parse(savedSession);
                 if (session.email) {
                     currentUserEmail = session.email;
-                    currentBalance = session.balance || 0;
-                    hasPreviousBalance = false;
-                    updateBalanceDisplay();
-                    loadNotifications();
-                    if (balanceCheckInterval) clearInterval(balanceCheckInterval);
-                    balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
-                    resetInactivityTimer();
-                    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
-                        document.addEventListener(event, trackActivity);
-                    });
-                    document.getElementById('login-overlay').classList.remove('active');
-                    document.body.classList.add('show-dashboard');
-                    document.getElementById('loader-wrapper').style.opacity = '0';
-                    document.getElementById('loader-wrapper').style.visibility = 'hidden';
-                    lucide.createIcons();
-                    showToast('Welcome back!', true);
+                    document.getElementById('home-main-balance').innerText = "Loading...";
+                    document.getElementById('home-main-balance').classList.add('loading-placeholder');
+                    
+                    fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(currentUserEmail)}`)
+                        .then(res => res.json())
+                        .then(users => {
+                            if (users && users.length > 0) {
+                                currentBalance = parseFloat(users[0].Balance) || 0;
+                                if (users[0].Notifications) {
+                                    notifications = JSON.parse(users[0].Notifications) || [];
+                                }
+                                updateBalanceDisplay();
+                                const dot = document.getElementById('notification-dot');
+                                if (dot && notifications.length > 0) dot.style.display = 'flex';
+                            }
+                            hasPreviousBalance = false;
+                            
+                            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+                            balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                            resetInactivityTimer();
+                            ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+                                document.addEventListener(event, trackActivity);
+                            });
+                            document.getElementById('login-overlay').classList.remove('active');
+                            document.body.classList.add('show-dashboard');
+                            document.getElementById('loader-wrapper').style.opacity = '0';
+                            document.getElementById('loader-wrapper').style.visibility = 'hidden';
+                            lucide.createIcons();
+                            showToast('Welcome back!', true);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching balance:', error);
+                            currentBalance = session.balance || 0;
+                            updateBalanceDisplay();
+                            hasPreviousBalance = false;
+                            
+                            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+                            balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
+                            resetInactivityTimer();
+                            document.getElementById('login-overlay').classList.remove('active');
+                            document.body.classList.add('show-dashboard');
+                            document.getElementById('loader-wrapper').style.opacity = '0';
+                            document.getElementById('loader-wrapper').style.visibility = 'hidden';
+                            lucide.createIcons();
+                        });
+                    return true;
                 }
             }
+            return false;
         }
         
         setInterval(updateLiveTicker, 5000);
@@ -1481,8 +1520,8 @@
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('hide-loader');
-                checkExistingSession();
-                if (!currentUserEmail) {
+                const hasSession = checkExistingSession();
+                if (!hasSession && !currentUserEmail) {
                     setTimeout(() => {
                         document.getElementById('login-overlay').classList.add('active');
                     }, 800);
