@@ -1093,6 +1093,24 @@
             }
         }
         
+        function resetInactivityTimer() {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (currentUserEmail) {
+                    localStorage.removeItem('binance_session');
+                    currentUserEmail = null;
+                    document.getElementById('login-overlay').classList.add('active');
+                    document.body.classList.remove('show-dashboard');
+                    closeProfilePopup();
+                    showToast('Session expired due to inactivity. Please login again.', false);
+                }
+            }, 180000);
+        }
+        
+        function trackActivity() {
+            resetInactivityTimer();
+        }
+        
         async function loadNotifications() {
             if (!currentUserEmail) return;
             try {
@@ -1187,24 +1205,6 @@
         
         function addFundsPlaceholder() {
             showToast('Add Fund is disabled. Balance updates directly from database.', false);
-        }
-        
-        function resetInactivityTimer() {
-            if (inactivityTimer) clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                if (currentUserEmail) {
-                    localStorage.removeItem('binance_session');
-                    currentUserEmail = null;
-                    document.getElementById('login-overlay').classList.add('active');
-                    document.body.classList.remove('show-dashboard');
-                    closeProfilePopup();
-                    showToast('Session expired due to inactivity. Please login again.', false);
-                }
-            }, 180000);
-        }
-        
-        function trackActivity() {
-            resetInactivityTimer();
         }
         
         async function addUserToSheet(user) {
