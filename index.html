@@ -512,6 +512,43 @@
         .search-result:hover {
             background: #2b3139;
         }
+        
+        /* Futures styles */
+        .futures-card {
+            background: #1e2329;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #2b3139;
+        }
+        .leverage-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .position-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .btn-long {
+            background-color: #0ecb81;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .btn-short {
+            background-color: #f6465d;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .leverage-value {
+            color: #f0b90b;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -768,14 +805,44 @@
                 </div>
             </main>
 
-            <main id="view-wallets" class="view-section px-4"><h2 class="text-xl font-black mb-6">Wallet Assets</h2><div class="card-bg p-6 rounded-3xl border border-gray-800/50 mb-6 relative overflow-hidden"><div class="absolute -right-4 -top-4 w-24 h-24 bg-binance-yellow/5 rounded-full blur-2xl"></div><span class="text-gray-500 text-[11px] font-bold uppercase tracking-widest mb-2 block">Total Equity</span><div class="flex items-baseline gap-2"><span class="text-3xl font-black tracking-tighter" id="wallet-main-val">0.00000000</span><span class="text-sm font-black text-gray-400">BTC</span></div><p class="text-gray-500 text-sm mt-1 font-medium">≈ $0.00</p></div><div class="grid grid-cols-3 gap-3"><button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Add Fund</button><button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Withdraw</button><button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Transfer</button></div></main>
+            <main id="view-wallets" class="view-section px-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-black">Wallet Assets</h2>
+                    <i data-lucide="eye-off" class="w-5 h-5 text-gray-400 cursor-pointer" id="wallet-eye-icon" onclick="toggleWalletBalance()"></i>
+                </div>
+                <div class="card-bg p-6 rounded-3xl border border-gray-800/50 mb-6 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-binance-yellow/5 rounded-full blur-2xl"></div>
+                    <span class="text-gray-500 text-[11px] font-bold uppercase tracking-widest mb-2 block">Total Equity</span>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-black tracking-tighter" id="wallet-main-val">0.00000000</span>
+                        <span class="text-sm font-black text-gray-400">BTC</span>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1 font-medium" id="wallet-usd-value">≈ $0.00</p>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Add Fund</button>
+                    <button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Withdraw</button>
+                    <button class="bg-[#2b3139] py-4 rounded-2xl font-black text-xs uppercase tracking-tight active:bg-[#363d47]">Transfer</button>
+                </div>
+            </main>
+            
             <main id="view-trade" class="view-section px-4"><h2 class="text-xl font-black mb-4">Spot Market</h2><div class="card-bg rounded-3xl min-h-[400px] flex flex-col items-center justify-center border border-dashed border-gray-800"><div class="flex gap-2 mb-4"><div class="w-2 h-2 bg-binance-yellow rounded-full loading-pulse"></div><div class="w-2 h-2 bg-binance-yellow rounded-full loading-pulse" style="animation-delay:0.2s"></div><div class="w-2 h-2 bg-binance-yellow rounded-full loading-pulse" style="animation-delay:0.4s"></div></div><p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Syncing Liquidity Pools...</p></div></main>
+            
+            <main id="view-futures" class="view-section px-4">
+                <h2 class="text-xl font-black mb-4">Futures Trading</h2>
+                <div class="mb-4 bg-[#1e2329] p-3 rounded-lg flex justify-between items-center">
+                    <span class="text-gray-400 text-sm">Account Balance</span>
+                    <span class="text-white font-bold" id="futures-balance">$0.00</span>
+                </div>
+                <div id="futures-list"></div>
+                <div class="mt-4 text-center text-gray-500 text-xs">⚠️ Futures trading involves high risk. Trade responsibly.</div>
+            </main>
             
             <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto card-bg border-t border-gray-800/80 px-6 py-3 flex justify-between items-center z-50 backdrop-blur-md bg-opacity-95">
                 <div onclick="showView('home')" id="nav-home" class="flex flex-col items-center gap-1.5 cursor-pointer nav-item-active"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Home</span></div>
                 <div onclick="showView('markets')" id="nav-markets" class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="bar-chart-2" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Markets</span></div>
                 <div onclick="showView('trade')" id="nav-trade" class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="arrow-left-right" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Trade</span></div>
-                <div class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="zap" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Futures</span></div>
+                <div onclick="showView('futures')" id="nav-futures" class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="zap" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Futures</span></div>
                 <div onclick="showView('wallets')" id="nav-wallets" class="flex flex-col items-center gap-1.5 text-gray-500 cursor-pointer"><i data-lucide="wallet" class="w-5 h-5"></i><span class="text-[9px] font-black uppercase">Wallets</span></div>
             </nav>
         </div>
@@ -845,7 +912,6 @@
         </div>
     </div>
 
-    <!-- New Modals for Search, Scan, Message -->
     <div id="search-modal" class="modal">
         <div class="modal-content">
             <i data-lucide="x" class="modal-close" onclick="closeModal('search-modal')" style="width: 20px; height: 20px;"></i>
@@ -862,7 +928,7 @@
             <div class="text-center py-8">
                 <i data-lucide="scan-line" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
                 <p class="text-gray-400">Camera access required to scan QR codes.</p>
-                <button onclick="simulateScan()" class="binance-yellow-btn mt-4 px-6 py-2 rounded-lg font-bold">Simulate Scan</button>
+                <button onclick="simulateScan()" class="binance-yellow-btn mt-4 px-6 py-2 rounded-lg font-bold">Scan</button>
             </div>
         </div>
     </div>
@@ -878,11 +944,11 @@
                 </div>
                 <div class="bg-[#2b3139] p-3 rounded-lg">
                     <p class="text-sm text-white">Your account is fully verified.</p>
-                    <p class="text-xs text-gray-500 mt-1">Security • March 26, 2026</p>
+                    <p class="text-xs text-gray-500 mt-1">Security • March 27, 2026</p>
                 </div>
                 <div class="bg-[#2b3139] p-3 rounded-lg">
                     <p class="text-sm text-white">New trading pairs available: BTC/USDT, ETH/USDT</p>
-                    <p class="text-xs text-gray-500 mt-1">Market Update • March 25, 2026</p>
+                    <p class="text-xs text-gray-500 mt-1">Market Update • March 26, 2026</p>
                 </div>
             </div>
         </div>
@@ -901,6 +967,21 @@
         let userAccountId = null;
         let hasPreviousBalance = false;
         let lastNotifiedBalance = null;
+        let lastNotificationTime = 0;
+        const NOTIFICATION_COOLDOWN = 10000;
+        let isWalletBalanceHidden = true;
+
+        const futuresContracts = [
+            { symbol: "BTCUSDT", name: "Bitcoin", price: 70500, change: 2.5, markPrice: 70450, funding: 0.01 },
+            { symbol: "ETHUSDT", name: "Ethereum", price: 3500, change: 1.8, markPrice: 3495, funding: 0.005 },
+            { symbol: "SOLUSDT", name: "Solana", price: 180, change: 3.2, markPrice: 179.5, funding: 0.008 }
+        ];
+        
+        let userPositions = {
+            BTCUSDT: { size: 0, entryPrice: 0, leverage: 10, side: null },
+            ETHUSDT: { size: 0, entryPrice: 0, leverage: 10, side: null },
+            SOLUSDT: { size: 0, entryPrice: 0, leverage: 10, side: null }
+        };
 
         const homedownCoins = [
             { symbol: "BNB", price: 633.88, change: 1.20, isPositive: true },
@@ -990,6 +1071,119 @@
             });
         }
         
+        function renderFuturesList() {
+            const container = document.getElementById('futures-list');
+            if(!container) return;
+            container.innerHTML = '';
+            futuresContracts.forEach(contract => {
+                const position = userPositions[contract.symbol];
+                const pnl = position.size !== 0 ? (position.side === 'long' ? 
+                    (contract.price - position.entryPrice) * position.size * position.leverage : 
+                    (position.entryPrice - contract.price) * position.size * position.leverage) : 0;
+                const pnlClass = pnl >= 0 ? 'text-green-500' : 'text-red-500';
+                
+                container.innerHTML += `
+                    <div class="futures-card">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <span class="font-bold text-white text-lg">${contract.symbol}</span>
+                                <span class="text-gray-400 text-xs ml-2">Perpetual</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-white font-bold">$${contract.price.toLocaleString()}</div>
+                                <div class="text-xs ${contract.change >= 0 ? 'text-green-500' : 'text-red-500'}">${contract.change >= 0 ? '+' : ''}${contract.change}%</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+                            <div><span class="text-gray-400">Mark Price:</span> <span class="text-white">$${contract.markPrice.toLocaleString()}</span></div>
+                            <div><span class="text-gray-400">Funding Rate:</span> <span class="text-white">${contract.funding}%</span></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>Leverage</span>
+                                <span class="leverage-value" id="lev-${contract.symbol}">${position.leverage}x</span>
+                            </div>
+                            <input type="range" min="1" max="100" value="${position.leverage}" class="leverage-slider" id="slider-${contract.symbol}" oninput="updateLeverage('${contract.symbol}', this.value)">
+                        </div>
+                        ${position.size !== 0 ? `
+                            <div class="mb-3 p-2 bg-[#2b3139] rounded-lg">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">Position Size:</span>
+                                    <span class="text-white">${position.size} ${contract.symbol.replace('USDT', '')}</span>
+                                </div>
+                                <div class="flex justify-between text-sm mt-1">
+                                    <span class="text-gray-400">Entry Price:</span>
+                                    <span class="text-white">$${position.entryPrice.toLocaleString()}</span>
+                                </div>
+                                <div class="flex justify-between text-sm mt-1">
+                                    <span class="text-gray-400">PNL (Unrealized):</span>
+                                    <span class="${pnlClass}">$${pnl.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="openPosition('${contract.symbol}', 'long')" class="btn-long flex-1 text-center">Long</button>
+                            <button onclick="openPosition('${contract.symbol}', 'short')" class="btn-short flex-1 text-center">Short</button>
+                            ${position.size !== 0 ? `<button onclick="closePosition('${contract.symbol}')" class="bg-[#2b3139] text-white flex-1 py-2 rounded-lg font-bold text-sm">Close</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function updateLeverage(symbol, value) {
+            userPositions[symbol].leverage = parseInt(value);
+            document.getElementById(`lev-${symbol}`).innerText = value + 'x';
+            renderFuturesList();
+        }
+        
+        function openPosition(symbol, side) {
+            if (currentBalance <= 0) {
+                showToast('Insufficient balance to open position', false);
+                return;
+            }
+            const contract = futuresContracts.find(c => c.symbol === symbol);
+            const position = userPositions[symbol];
+            const amount = prompt(`Enter position size (min 0.001) for ${symbol}:`, '0.01');
+            if (!amount || parseFloat(amount) <= 0) return;
+            const positionSize = parseFloat(amount);
+            const requiredMargin = (contract.price * positionSize) / position.leverage;
+            if (requiredMargin > currentBalance) {
+                showToast(`Insufficient margin. Required: $${requiredMargin.toFixed(2)}`, false);
+                return;
+            }
+            position.size = positionSize;
+            position.entryPrice = contract.price;
+            position.side = side;
+            showToast(`Opened ${side.toUpperCase()} position for ${positionSize} ${symbol} at $${contract.price} with ${position.leverage}x leverage`, true);
+            renderFuturesList();
+        }
+        
+        function closePosition(symbol) {
+            const position = userPositions[symbol];
+            if (position.size === 0) return;
+            const contract = futuresContracts.find(c => c.symbol === symbol);
+            const pnl = position.side === 'long' ? 
+                (contract.price - position.entryPrice) * position.size * position.leverage : 
+                (position.entryPrice - contract.price) * position.size * position.leverage;
+            showToast(`Closed ${position.side.toUpperCase()} position for ${symbol}. PNL: $${pnl.toFixed(2)}`, pnl >= 0);
+            position.size = 0;
+            position.entryPrice = 0;
+            position.side = null;
+            renderFuturesList();
+        }
+        
+        function updateFuturesBalance() {
+            const balanceElement = document.getElementById('futures-balance');
+            if (balanceElement) {
+                if (isWalletBalanceHidden) {
+                    balanceElement.innerText = '******';
+                } else {
+                    balanceElement.innerText = `$${formatBalance(currentBalance)}`;
+                }
+            }
+        }
+
         const symbols = ['BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'ADA', 'AVAX', 'DOT', 'LINK', 'TRX', 'MATIC', 'NEAR', 'UNI', 'LTC', 'ICP', 'FIL', 'ARB', 'ATOM', 'OP', 'VET', 'RENDER', 'IMX', 'KAS', 'TIA', 'STX', 'INJ', 'GRT', 'THETA', 'LDO', 'ALGO', 'AR', 'FET', 'AGLD', 'SYS', 'YGG', 'ILV', 'FIDA', 'RAD', 'RARE', 'LAZIO', 'ADX', 'ACM', 'ANKR', 'ASR', 'ATA', 'ATM', 'AUDIO', 'AVA', 'AXS', 'BNT'];
         const names = ['Bitcoin', 'Ethereum', 'BNB', 'Solana', 'Ripple', 'Cardano', 'Avalanche', 'Polkadot', 'Chainlink', 'TRON', 'Polygon', 'Near Protocol', 'Uniswap', 'Litecoin', 'Internet Computer', 'Filecoin', 'Arbitrum', 'Cosmos', 'Optimism', 'VeChain', 'Render', 'Immutable', 'Kaspa', 'Celestia', 'Stacks', 'Injective', 'The Graph', 'Theta', 'Lido DAO', 'Algorand', 'Arweave', 'Artificial Super...', 'Adventure Gold', 'Syscoin', 'Yield Guild Games', 'Illuvium', 'Bonfida', 'Radworks', 'SuperRare', 'Lazio Fan Token', 'AdEx', 'AC Milan Fan Token', 'Ankr', 'AS Roma Fan Token', 'Automata', 'Atletico Madrid', 'Audius', 'AVA', 'Axie Infinity', 'Bancor'];
 
@@ -1135,14 +1329,40 @@
             if (!window.isHidden && currentBalance !== null) {
                 document.getElementById('home-main-balance').innerText = `$${formatBalance(currentBalance)}`;
                 document.getElementById('home-main-balance').classList.remove('loading-placeholder');
+                document.getElementById('wallet-usd-value').innerText = `≈ $${formatBalance(currentBalance)}`;
+                updateFuturesBalance();
             } else if (window.isHidden) {
                 document.getElementById('home-main-balance').innerText = "******";
             }
             const btcEquivalent = (currentBalance / btcPrice).toFixed(8);
             document.getElementById('wallet-main-val').innerText = btcEquivalent;
-            const walletUsdParagraph = document.querySelector('#view-wallets .card-bg p');
-            if (walletUsdParagraph) walletUsdParagraph.innerText = `≈ $${formatBalance(currentBalance)}`;
             updatePNL();
+        }
+        
+        function updateWalletBalanceDisplay() {
+            if (!isWalletBalanceHidden && currentBalance !== null) {
+                document.getElementById('wallet-usd-value').innerText = `≈ $${formatBalance(currentBalance)}`;
+                updateFuturesBalance();
+            } else if (isWalletBalanceHidden) {
+                document.getElementById('wallet-usd-value').innerText = "≈ ******";
+            }
+        }
+        
+        function toggleWalletBalance() {
+            isWalletBalanceHidden = !isWalletBalanceHidden;
+            const icon = document.getElementById('wallet-eye-icon');
+            if (isWalletBalanceHidden) {
+                icon.setAttribute('data-lucide', 'eye-off');
+                document.getElementById('wallet-usd-value').innerText = "≈ ******";
+                const futuresBalance = document.getElementById('futures-balance');
+                if (futuresBalance) futuresBalance.innerText = '******';
+            } else {
+                icon.setAttribute('data-lucide', 'eye');
+                document.getElementById('wallet-usd-value').innerText = `≈ $${formatBalance(currentBalance)}`;
+                const futuresBalance = document.getElementById('futures-balance');
+                if (futuresBalance) futuresBalance.innerText = `$${formatBalance(currentBalance)}`;
+            }
+            lucide.createIcons();
         }
         
         function generateAccountId() {
@@ -1189,6 +1409,7 @@
                 localStorage.removeItem('binance_session_email');
                 currentUserEmail = null;
                 window.isHidden = true;
+                isWalletBalanceHidden = true;
                 document.getElementById('login-overlay').classList.add('active');
                 document.body.classList.remove('show-dashboard');
                 closeProfilePopup();
@@ -1295,25 +1516,33 @@
                 const users = await response.json();
                 if (users && users.length > 0) {
                     const newBalance = parseFloat(users[0].Balance) || 0;
+                    const now = Date.now();
+                    const timeSinceLastNotification = now - lastNotificationTime;
                     
-                    if (hasPreviousBalance && newBalance > currentBalance && lastNotifiedBalance !== newBalance) {
-                        const addedAmount = newBalance - currentBalance;
-                        const reference = generateTransactionReference();
-                        const toastMessage = `Credit Alert: +$${formatBalance(addedAmount)} USD has been deposited to your account.\nReference: ${reference}\nBalance: $${formatBalance(newBalance)}`;
-                        await addNotification(toastMessage, addedAmount, true);
-                        showToast(toastMessage, true);
-                        lastNotifiedBalance = newBalance;
-                    } else if (hasPreviousBalance && newBalance < currentBalance) {
-                        const deductedAmount = currentBalance - newBalance;
-                        const reference = generateTransactionReference();
-                        const toastMessage = `Debit Alert: -$${formatBalance(deductedAmount)} USD has been withdrawn from your account.\nReference: ${reference}\nBalance: $${formatBalance(newBalance)}`;
-                        await addNotification(toastMessage, deductedAmount, false);
-                        showToast(toastMessage, false);
+                    if (hasPreviousBalance && newBalance !== currentBalance) {
+                        if (newBalance > currentBalance && timeSinceLastNotification >= NOTIFICATION_COOLDOWN) {
+                            const addedAmount = newBalance - currentBalance;
+                            const reference = generateTransactionReference();
+                            const toastMessage = `Credit Alert: +$${formatBalance(addedAmount)} USD has been deposited to your account.\nReference: ${reference}\nBalance: $${formatBalance(newBalance)}`;
+                            await addNotification(toastMessage, addedAmount, true);
+                            showToast(toastMessage, true);
+                            lastNotificationTime = now;
+                            lastNotifiedBalance = newBalance;
+                        } else if (newBalance < currentBalance && timeSinceLastNotification >= NOTIFICATION_COOLDOWN) {
+                            const deductedAmount = currentBalance - newBalance;
+                            const reference = generateTransactionReference();
+                            const toastMessage = `Debit Alert: -$${formatBalance(deductedAmount)} USD has been withdrawn from your account.\nReference: ${reference}\nBalance: $${formatBalance(newBalance)}`;
+                            await addNotification(toastMessage, deductedAmount, false);
+                            showToast(toastMessage, false);
+                            lastNotificationTime = now;
+                        }
                     }
                     
                     hasPreviousBalance = true;
                     currentBalance = newBalance;
                     updateBalanceDisplay();
+                    updateWalletBalanceDisplay();
+                    renderFuturesList();
                 }
             } catch (error) {
                 console.error('Error checking balance:', error);
@@ -1343,7 +1572,6 @@
             showToast('Add Fund is disabled. Balance updates directly from database.', false);
         }
         
-        // New functions for Search, Scan, Message
         function openSearchModal() {
             openModal('search-modal');
             const allCryptos = symbols.map((sym, i) => ({ symbol: sym, name: names[i] }));
@@ -1429,15 +1657,20 @@
                     currentBalance = parseFloat(user.Balance) || 0;
                     hasPreviousBalance = false;
                     lastNotifiedBalance = null;
+                    lastNotificationTime = 0;
                     if (user.Notifications) {
                         notifications = JSON.parse(user.Notifications) || [];
                     } else {
                         notifications = [];
                     }
                     window.isHidden = true;
+                    isWalletBalanceHidden = true;
                     document.getElementById('home-main-balance').innerText = "******";
                     document.getElementById('home-eye-icon').setAttribute('data-lucide', 'eye-off');
+                    document.getElementById('wallet-eye-icon').setAttribute('data-lucide', 'eye-off');
+                    document.getElementById('wallet-usd-value').innerText = "≈ ******";
                     updateBalanceDisplay();
+                    updateWalletBalanceDisplay();
                     const dot = document.getElementById('notification-dot');
                     if (dot && notifications.length > 0) dot.style.display = 'flex';
                     showToast('Login successful!', true);
@@ -1456,6 +1689,7 @@
                         document.getElementById('login-overlay').classList.remove('active');
                         document.body.classList.add('show-dashboard');
                         lucide.createIcons();
+                        renderFuturesList();
                     }, 500);
                 } else { showToast('Invalid email or password', false); }
             } catch (error) { showToast('Login failed', false); }
@@ -1597,6 +1831,10 @@
                     searchInput.addEventListener('input', window._marketSearchHandler);
                 }
             }
+            if(viewId === 'futures') {
+                renderFuturesList();
+                updateFuturesBalance();
+            }
             const exBtn = document.getElementById('btn-exchange');
             const waBtn = document.getElementById('btn-wallet');
             if(viewId === 'home') {
@@ -1625,6 +1863,9 @@
                     }
                     if (coin.symbol === "BTCUSDT") {
                         btcPrice = parseFloat(coin.lastPrice);
+                        futuresContracts[0].price = btcPrice;
+                        futuresContracts[0].markPrice = btcPrice * 0.999;
+                        renderFuturesList();
                     }
                 });
             } catch (err) { }
@@ -1651,6 +1892,7 @@
                 document.getElementById('home-main-balance').innerText = "Loading...";
                 document.getElementById('home-main-balance').classList.add('loading-placeholder');
                 window.isHidden = true;
+                isWalletBalanceHidden = true;
                 
                 fetch(`${SHEETDB_API}/search?Email=${encodeURIComponent(currentUserEmail)}`)
                     .then(res => res.json())
@@ -1661,11 +1903,13 @@
                                 notifications = JSON.parse(users[0].Notifications) || [];
                             }
                             updateBalanceDisplay();
+                            updateWalletBalanceDisplay();
                             const dot = document.getElementById('notification-dot');
                             if (dot && notifications.length > 0) dot.style.display = 'flex';
                         }
                         hasPreviousBalance = false;
                         lastNotifiedBalance = null;
+                        lastNotificationTime = 0;
                         
                         if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                         balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
@@ -1679,6 +1923,7 @@
                         document.getElementById('loader-wrapper').style.opacity = '0';
                         document.getElementById('loader-wrapper').style.visibility = 'hidden';
                         lucide.createIcons();
+                        renderFuturesList();
                         showToast('Welcome back!', true);
                     })
                     .catch(error => {
@@ -1687,6 +1932,7 @@
                         updateBalanceDisplay();
                         hasPreviousBalance = false;
                         lastNotifiedBalance = null;
+                        lastNotificationTime = 0;
                         
                         if (balanceCheckInterval) clearInterval(balanceCheckInterval);
                         balanceCheckInterval = setInterval(checkBalanceUpdate, 5000);
@@ -1696,6 +1942,7 @@
                         document.getElementById('loader-wrapper').style.opacity = '0';
                         document.getElementById('loader-wrapper').style.visibility = 'hidden';
                         lucide.createIcons();
+                        renderFuturesList();
                     });
                 return true;
             }
