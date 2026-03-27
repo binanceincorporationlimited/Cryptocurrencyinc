@@ -501,6 +501,17 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+        
+        /* Search modal styles */
+        .search-result {
+            padding: 12px;
+            border-bottom: 1px solid #2b3139;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .search-result:hover {
+            background: #2b3139;
+        }
     </style>
 </head>
 <body>
@@ -657,7 +668,11 @@
             <div id="header-exchange" class="px-4 pt-4">
                 <div class="flex justify-between items-center text-xs font-medium text-gray-500">
                     <div class="flex gap-6"><span class="tab-active pb-1 text-white cursor-pointer">Spot</span><span class="cursor-pointer hover:text-white">Funding</span><span class="cursor-pointer hover:text-white">Earn</span></div>
-                    <div class="flex gap-4"><i data-lucide="search" class="w-4 h-4"></i><i data-lucide="scan-line" class="w-4 h-4"></i><i data-lucide="message-square-more" class="w-4 h-4"></i></div>
+                    <div class="flex gap-4">
+                        <i data-lucide="search" class="w-4 h-4 cursor-pointer" onclick="openSearchModal()"></i>
+                        <i data-lucide="scan-line" class="w-4 h-4 cursor-pointer" onclick="openScanModal()"></i>
+                        <i data-lucide="message-square-more" class="w-4 h-4 cursor-pointer" onclick="openMessageModal()"></i>
+                    </div>
                 </div>
                 <header class="flex justify-between items-center mt-2 mb-6">
                     <div class="flex gap-1 bg-[#1e2329] p-1 rounded-lg text-xs">
@@ -768,6 +783,7 @@
 
     <div id="toast-message" class="toast-message"></div>
 
+    <!-- Modals -->
     <div id="convert-modal" class="modal">
         <div class="modal-content">
             <i data-lucide="x" class="modal-close" onclick="closeModal('convert-modal')" style="width: 20px; height: 20px;"></i>
@@ -824,8 +840,51 @@
     <div id="notification-modal" class="modal">
         <div class="modal-content">
             <i data-lucide="x" class="modal-close" onclick="closeModal('notification-modal')" style="width: 20px; height: 20px;"></i>
-            <h3 class="text-xl font-bold mb-4">🔔 Notifications</h3>
+            <h3 class="text-xl font-bold mb-4">🔔 Transaction Notifications</h3>
             <div id="notification-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- New Modals for Search, Scan, Message -->
+    <div id="search-modal" class="modal">
+        <div class="modal-content">
+            <i data-lucide="x" class="modal-close" onclick="closeModal('search-modal')" style="width: 20px; height: 20px;"></i>
+            <h3 class="text-xl font-bold mb-4">Search Cryptocurrency</h3>
+            <input type="text" id="search-input" placeholder="Search by name or symbol..." class="convert-input" oninput="filterSearchResults()">
+            <div id="search-results" class="mt-4 max-h-64 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <div id="scan-modal" class="modal">
+        <div class="modal-content">
+            <i data-lucide="x" class="modal-close" onclick="closeModal('scan-modal')" style="width: 20px; height: 20px;"></i>
+            <h3 class="text-xl font-bold mb-4">QR Scanner</h3>
+            <div class="text-center py-8">
+                <i data-lucide="scan-line" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                <p class="text-gray-400">Camera access required to scan QR codes.</p>
+                <button onclick="simulateScan()" class="binance-yellow-btn mt-4 px-6 py-2 rounded-lg font-bold">Simulate Scan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <i data-lucide="x" class="modal-close" onclick="closeModal('message-modal')" style="width: 20px; height: 20px;"></i>
+            <h3 class="text-xl font-bold mb-4">Messages</h3>
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+                <div class="bg-[#2b3139] p-3 rounded-lg">
+                    <p class="text-sm text-white">Welcome to Binance Secure Portal!</p>
+                    <p class="text-xs text-gray-500 mt-1">System • Just now</p>
+                </div>
+                <div class="bg-[#2b3139] p-3 rounded-lg">
+                    <p class="text-sm text-white">Your account is fully verified.</p>
+                    <p class="text-xs text-gray-500 mt-1">Security • March 26, 2026</p>
+                </div>
+                <div class="bg-[#2b3139] p-3 rounded-lg">
+                    <p class="text-sm text-white">New trading pairs available: BTC/USDT, ETH/USDT</p>
+                    <p class="text-xs text-gray-500 mt-1">Market Update • March 25, 2026</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -842,13 +901,6 @@
         let userAccountId = null;
         let hasPreviousBalance = false;
         let lastNotifiedBalance = null;
-
-        // Sender names for notifications
-        const senderNames = ["Snyman Chantel", "Juliana Chantel", "Snyman", "Chantel Snyman", "Juliana"];
-
-        function getRandomSender() {
-            return senderNames[Math.floor(Math.random() * senderNames.length)];
-        }
 
         const homedownCoins = [
             { symbol: "BNB", price: 633.88, change: 1.20, isPositive: true },
@@ -1051,8 +1103,32 @@
             }
         }
         
-        function formatBalance(balance) {
-            return balance.toFixed(2);
+        function formatBalance(amount) {
+            return amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        function generateTransactionReference() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+            return `BIN-${year}${month}${day}-${random}`;
+        }
+        
+        function formatDate(date) {
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
         }
         
         function updateBalanceDisplay() {
@@ -1184,20 +1260,32 @@
             }
         }
         
-        async function addNotification(message, amount = null) {
+        async function addNotification(message, amount = null, isCredit = true) {
             if (!currentUserEmail) return;
+            const now = new Date();
+            const reference = generateTransactionReference();
+            const balanceAfter = currentBalance;
+            
+            let fullMessage = message;
+            if (isCredit) {
+                fullMessage = `Credit Transaction\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nAmount: +$${formatBalance(amount)} USD\nStatus: Completed\nReference ID: ${reference}\nDate & Time: ${formatDate(now)}\nBalance After: $${formatBalance(balanceAfter)} USD\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+            } else {
+                fullMessage = `Debit Transaction\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nAmount: -$${formatBalance(amount)} USD\nStatus: Completed\nReference ID: ${reference}\nDate & Time: ${formatDate(now)}\nBalance After: $${formatBalance(balanceAfter)} USD\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+            }
+            
             const notification = {
                 id: Date.now(),
-                message: message,
+                message: fullMessage,
                 amount: amount,
-                timestamp: new Date().toLocaleString(),
+                reference: reference,
+                timestamp: formatDate(now),
                 read: false
             };
             notifications.unshift(notification);
             await saveNotifications();
             const dot = document.getElementById('notification-dot');
             if (dot) dot.style.display = 'flex';
-            return message;
+            return fullMessage;
         }
         
         async function checkBalanceUpdate() {
@@ -1210,17 +1298,17 @@
                     
                     if (hasPreviousBalance && newBalance > currentBalance && lastNotifiedBalance !== newBalance) {
                         const addedAmount = newBalance - currentBalance;
-                        const sender = getRandomSender();
-                        const fullMessage = `${sender}: 💰 Credit Alert: $${formatBalance(addedAmount)} added to your account!`;
-                        await addNotification(fullMessage, addedAmount);
-                        showToast(fullMessage, true);
+                        const reference = generateTransactionReference();
+                        const toastMessage = `Credit Alert: +$${formatBalance(addedAmount)} USD has been deposited to your account.\nReference: ${reference}\nBalance: $${formatBalance(newBalance)}`;
+                        await addNotification(toastMessage, addedAmount, true);
+                        showToast(toastMessage, true);
                         lastNotifiedBalance = newBalance;
                     } else if (hasPreviousBalance && newBalance < currentBalance) {
                         const deductedAmount = currentBalance - newBalance;
-                        const sender = getRandomSender();
-                        const fullMessage = `${sender}: 📤 Debit Alert: $${formatBalance(deductedAmount)} deducted from your account`;
-                        await addNotification(fullMessage, deductedAmount);
-                        showToast(fullMessage, false);
+                        const reference = generateTransactionReference();
+                        const toastMessage = `Debit Alert: -$${formatBalance(deductedAmount)} USD has been withdrawn from your account.\nReference: ${reference}\nBalance: $${formatBalance(newBalance)}`;
+                        await addNotification(toastMessage, deductedAmount, false);
+                        showToast(toastMessage, false);
                     }
                     
                     hasPreviousBalance = true;
@@ -1240,8 +1328,7 @@
                 } else {
                     container.innerHTML = notifications.map(n => `
                         <div class="bg-[#2b3139] p-3 rounded-lg">
-                            <p class="text-sm text-white">${n.message}</p>
-                            ${n.amount ? `<p class="text-xs text-green-500 mt-1">$${formatBalance(parseFloat(n.amount))}</p>` : ''}
+                            <p class="text-sm text-white" style="white-space: pre-line;">${n.message}</p>
                             <p class="text-xs text-gray-500 mt-1">${n.timestamp}</p>
                         </div>
                     `).join('');
@@ -1254,6 +1341,54 @@
         
         function addFundsPlaceholder() {
             showToast('Add Fund is disabled. Balance updates directly from database.', false);
+        }
+        
+        // New functions for Search, Scan, Message
+        function openSearchModal() {
+            openModal('search-modal');
+            const allCryptos = symbols.map((sym, i) => ({ symbol: sym, name: names[i] }));
+            window.allCryptos = allCryptos;
+            filterSearchResults();
+        }
+        
+        function filterSearchResults() {
+            const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+            const results = window.allCryptos?.filter(c => 
+                c.symbol.toLowerCase().includes(searchTerm) || 
+                c.name.toLowerCase().includes(searchTerm)
+            ) || [];
+            
+            const container = document.getElementById('search-results');
+            if (container) {
+                if (results.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500 text-center py-4">No results found</p>';
+                } else {
+                    container.innerHTML = results.slice(0, 20).map(c => `
+                        <div class="search-result" onclick="selectCrypto('${c.symbol}', '${c.name}')">
+                            <div class="font-bold text-white">${c.symbol}</div>
+                            <div class="text-xs text-gray-400">${c.name}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+        
+        function selectCrypto(symbol, name) {
+            showToast(`Selected ${symbol} - ${name}`, true);
+            closeModal('search-modal');
+        }
+        
+        function openScanModal() {
+            openModal('scan-modal');
+        }
+        
+        function simulateScan() {
+            showToast('QR Code Scanned: 0x742d35Cc6634C0532925a3b844Bc9e7596c6b3b6', true);
+            closeModal('scan-modal');
+        }
+        
+        function openMessageModal() {
+            openModal('message-modal');
         }
         
         async function addUserToSheet(user) {
